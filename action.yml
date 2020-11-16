@@ -1,0 +1,19 @@
+name: 'sops-decryption'
+description: 'Decrypt the given sops encrypted file'
+inputs:
+  version:
+    description: 'Version of SOPS to be used'
+    required: false
+    default: latest
+  file:
+    description: 'SOPS encrypted file to decrypt'
+    required: true
+  pgp-key:
+    description: 'PGP key to decrypt the file'
+    required: true
+outputs:
+  data:
+    description: 'Decrypted data'
+runs:
+  using: 'node12'
+  main: 'lib/index.js'
