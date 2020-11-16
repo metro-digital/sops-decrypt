@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
-import {installSOPS} from '../src/index';
+import * as sops from '../src/index';
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools');
@@ -28,7 +28,7 @@ describe('When SOPS pacakge does not exist in caching directory', () => {
     const version = '3.6.1';
     const dir = path.join(toolsDir, 'sops', version, os.arch());
 
-    await installSOPS(version)
+    await sops.install(version)
 
     expect(fs.existsSync(path.join(dir, 'sops'))).toBe(true);
   }, 100000)

@@ -2,26 +2,23 @@ import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as os from 'os'
 
-export async function installSOPS(version: string) {
+export async function install(version: string) {
   const toolName = 'sops'
-  let extension = os.platform() === 'win32' ? '.exe' : '';
-  let url = downloadURL(version, extension);
-  let binaryPath = await downloadSOPS(version, toolName, extension, url)
+  let extension = process.platform === 'win32' ? '.exe' : '';
+  let url = downloadURL(version);
+  let binaryPath = await download(version, toolName, extension, url)
 
   core.addPath(path.dirname(binaryPath))
 }
 
-function downloadURL(version: string, fileExtension: string) {
-  if(fileExtension === '') {
-    fileExtension = os.platform()
-  }
+export function downloadURL(version: string) {
+  let extension = process.platform === 'win32' ? 'exe' : process.platform;
 
-  return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${fileExtension}`
+  return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`
 }
 
-async function downloadSOPS(version: string, toolName: string, extension:string, url: string) {
+async function download(version: string, toolName: string, extension:string, url: string) {
   let cachedToolpath = toolCache.find(toolName, version);
   if (!cachedToolpath) {
     core.debug(`Downloading ${toolName} from: ${url}`);
