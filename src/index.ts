@@ -1,14 +1,12 @@
 import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import * as path from 'path'
-import * as fs from 'fs'
 
 export async function install(version: string) {
   const toolName = 'sops'
   let extension = process.platform === 'win32' ? '.exe' : '';
   let url = downloadURL(version);
-  let binaryPath = await download(version, toolName, extension, url)
-
+  let binaryPath = await download(version, toolName, extension, url);
   core.addPath(path.dirname(binaryPath))
 }
 
@@ -18,7 +16,7 @@ export function downloadURL(version: string) {
   return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`
 }
 
-async function download(version: string, toolName: string, extension:string, url: string) {
+export async function download(version: string, toolName: string, extension:string, url: string) {
   let cachedToolpath = toolCache.find(toolName, version);
   if (!cachedToolpath) {
     core.debug(`Downloading ${toolName} from: ${url}`);
@@ -43,8 +41,6 @@ async function download(version: string, toolName: string, extension:string, url
     cachedToolpath,
     toolName + extension,
   );
-
-  fs.chmodSync(executablePath, '777');
 
   return executablePath
 }
