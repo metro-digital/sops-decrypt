@@ -10,12 +10,14 @@ let mockCacheFile: jest.Mock
 let mockDownloadTool: jest.Mock
 let mockFindTool: jest.Mock
 let mockAddPath: jest.Mock
+let mockExecutePermission: jest.Mock
 
 beforeEach(()=>{
   mockCacheFile = mocked(toolsCache.cacheFile, true)
   mockDownloadTool = mocked(toolsCache.downloadTool, true)
   mockFindTool = mocked(toolsCache.find, true)
   mockAddPath = mocked(core.addPath, true)
+  mockExecutePermission = jest.fn()
 })
 
 afterEach(()=>{
@@ -23,6 +25,7 @@ afterEach(()=>{
   mockDownloadTool.mockReset()
   mockFindTool.mockReset()
   mockAddPath.mockReset()
+  mockExecutePermission.mockReset()
 })
 
 describe('When getting the download URL for SOPS', () => {
@@ -91,11 +94,20 @@ describe('When SOPS is being downloaded', ()=> {
 })
 
 describe('When SOPS is being installed', ()=> {
+  it('should add execute premissions to the installed binary', async ()=>{
+    const version = '3.6.1';
+    mockCacheFile.mockResolvedValue('binarypath/version')
+
+    await sops.install(mockExecutePermission, version)
+
+    expect(mockExecutePermission).toHaveBeenCalledWith('binarypath/version/sops', '777');
+  })
+
   it('should add the path of SOPS to PATH variable', async ()=>{
     const version = '3.6.1';
     mockCacheFile.mockResolvedValue('binarypath/version')
 
-    await sops.install(version)
+    await sops.install(mockExecutePermission, version)
 
     expect(mockAddPath).toHaveBeenCalledWith('binarypath/version');
   })

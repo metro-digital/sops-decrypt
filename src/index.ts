@@ -2,11 +2,12 @@ import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import * as path from 'path'
 
-export async function install(version: string) {
+export async function install(chmod: Function, version: string) {
   const toolName = 'sops'
   let extension = process.platform === 'win32' ? '.exe' : '';
   let url = downloadURL(version);
   let binaryPath = await download(version, toolName, extension, url);
+  chmod(binaryPath, '777')
   core.addPath(path.dirname(binaryPath))
 }
 
