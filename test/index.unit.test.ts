@@ -2,15 +2,18 @@ import * as sops from '../src/index';
 import * as core from '@actions/core';
 import * as toolsCache from '@actions/tool-cache';
 import { mocked } from 'ts-jest/utils';
+import * as gpg from '../src/gpg'
 
 jest.mock('@actions/core')
 jest.mock('@actions/tool-cache')
+jest.mock('../src/gpg')
 
 let mockCacheFile: jest.Mock
 let mockDownloadTool: jest.Mock
 let mockFindTool: jest.Mock
 let mockAddPath: jest.Mock
 let mockExecutePermission: jest.Mock
+let mockGPGImport: jest.Mock
 
 beforeEach(()=>{
   mockCacheFile = mocked(toolsCache.cacheFile, true)
@@ -18,6 +21,7 @@ beforeEach(()=>{
   mockFindTool = mocked(toolsCache.find, true)
   mockAddPath = mocked(core.addPath, true)
   mockExecutePermission = jest.fn()
+  mockGPGImport = mocked(gpg.import_key, true)
 })
 
 afterEach(()=>{
@@ -26,6 +30,7 @@ afterEach(()=>{
   mockFindTool.mockReset()
   mockAddPath.mockReset()
   mockExecutePermission.mockReset()
+  mockGPGImport.mockReset()
 })
 
 describe('When getting the download URL for SOPS', () => {
@@ -110,6 +115,16 @@ describe('When SOPS is being installed', ()=> {
     await sops.install(mockExecutePermission, version)
 
     expect(mockAddPath).toHaveBeenCalledWith('binarypath/version');
+  })
+})
+
+describe('When decrypting a secret file', ()=>{
+  it('should pass the right pgp key to import', ()=>{
+    let expectedGPGKey = 'sample_key'
+
+    sops.decrypt(expectedGPGKey)
+
+    expect(mockGPGImport).toHaveBeenCalledWith(expectedGPGKey)
   })
 })
 

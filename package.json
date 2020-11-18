@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "ncc build src/index.ts",
-    "unitTests": "jest test/index.unit.test.ts",
+    "unitTests": "jest test/*.unit.test.ts",
     "journeyTests": "jest test/index.journey.test.ts"
   },
   "repository": {

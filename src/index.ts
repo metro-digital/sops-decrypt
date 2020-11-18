@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import * as path from 'path'
+import * as gpg from './gpg'
 
 export async function install(chmod: Function, version: string) {
   const toolName = 'sops'
@@ -44,4 +45,8 @@ export async function download(version: string, toolName: string, extension:stri
   );
 
   return executablePath
+}
+
+export async function decrypt(base64_gpgKey: string) {
+  gpg.import_key(base64_gpgKey)
 }
