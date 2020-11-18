@@ -1,8 +1,8 @@
-import * as gpg from '../src/gpg'
-import * as command from '../src/command'
+import * as gpg from '../../src/gpg'
+import * as command from '../../src/command'
 import { mocked } from 'ts-jest/utils';
 
-jest.mock('../src/command')
+jest.mock('../../src/command')
 
 let mockExec: jest.Mock
 

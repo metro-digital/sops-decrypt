@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "ncc build src/index.ts",
-    "unitTests": "jest test/*.unit.test.ts",
-    "journeyTests": "jest test/index.journey.test.ts"
+    "unitTests": "jest tests/unit/*.test.ts",
+    "journeyTests": "jest tests/journey/index.test.ts"
   },
   "repository": {
     "type": "git",

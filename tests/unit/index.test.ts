@@ -1,12 +1,12 @@
-import * as sops from '../src/index';
+import * as sops from '../../src/index';
 import * as core from '@actions/core';
 import * as toolsCache from '@actions/tool-cache';
 import { mocked } from 'ts-jest/utils';
-import * as gpg from '../src/gpg'
+import * as gpg from '../../src/gpg'
 
 jest.mock('@actions/core')
 jest.mock('@actions/tool-cache')
-jest.mock('../src/gpg')
+jest.mock('../../src/gpg')
 
 let mockCacheFile: jest.Mock
 let mockDownloadTool: jest.Mock

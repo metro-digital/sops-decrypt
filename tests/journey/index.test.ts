@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
-import * as sops from '../src/index';
+import * as sops from '../../src/index';
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools');
