@@ -2,9 +2,11 @@ import * as core from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 import * as path from 'path'
 import * as gpg from './gpg'
+import * as sops from './sops'
 
-export async function install(chmod: Function, version: string) {
-  const toolName = 'sops'
+const toolName = 'sops'
+
+export async function install(toolName: string, chmod: Function, version: string) {
   let extension = process.platform === 'win32' ? '.exe' : '';
   let url = downloadURL(version);
   let binaryPath = await download(version, toolName, extension, url);
@@ -47,9 +49,10 @@ export async function download(version: string, toolName: string, extension:stri
   return executablePath
 }
 
-export async function decrypt(base64_gpgKey: string) {
+export async function decrypt(base64_gpgKey: string, secret_file: string) {
   try {
     await gpg.import_key(base64_gpgKey)
+    await sops.decrypt(secret_file)
   }
   catch(e) {
     throw new Error(`Failed decrypting the secret file: ${e.message}`)
