@@ -3,5 +3,8 @@ export async function import_key(base64_gpg_key: string) {
   let gpg_key: string = atob(base64_gpg_key)
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--import')
-  await command.exec('gpg', gpgArgs, gpg_key);
+  let result: command.Result  = await command.exec('gpg', gpgArgs, gpg_key);
+  if(!result.status) {
+    throw new Error(result.error);
+  }
 }
