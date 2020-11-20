@@ -8,34 +8,51 @@ let mockExec: jest.Mock
 
 beforeEach(()=>{
   mockExec = mocked(command.exec, true)
-  mockExec.mockReturnValue({
-    status: true,
-    output: 'imported',
-    error: 'Unable to imort the gpg key'
-  } as command.Result)
 })
 
 afterEach(()=>{
   mockExec.mockReset()
 })
 
-describe('when a gpg key is imported', ()=>{
-  it('should pass the right arguments', async ()=>{
-    let expectedArgs: string[] = [];
-    expectedArgs.push('--import')
+describe('When importing of a gpg key',()=>{
+  describe('is successful', ()=>{
+    beforeEach(()=>{
+      mockExec.mockReturnValue({
+        status: true,
+        output: 'imported',
+        error: 'Unable to imort the gpg key'
+      } as command.Result)
+    })
 
-    await gpg.import_key(btoa('sample_gpg_key'))
+    it('should pass the right arguments', async ()=>{
+      let expectedArgs: string[] = [];
+      expectedArgs.push('--import')
 
-    expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
+      await gpg.import_key(btoa('sample_gpg_key'))
+
+      expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
+    })
+
+    it('should not throw an error', async ()=>{
+      await expect(gpg.import_key(btoa('sample_gpg_key'))).resolves.not.toThrow();
+    })
   })
 
-  it('should throw an error if import fails', async ()=>{
-    mockExec.mockReturnValue({
-          status: false,
-          output: '',
-          error: 'Unable to import the gpg key'
+  describe('is a failure', ()=>{
+    beforeEach(()=>{
+      mockExec.mockReturnValue({
+        status: false,
+        output: 'imported',
+        error: 'Unable to imort the gpg key'
       } as command.Result)
+    })
 
-    await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrowError('Unable to import the gpg key');
+    it('should throw an error', async ()=>{
+      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrow();
+    })
+
+    it('should throw the error returned by the command', async ()=>{
+      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrowError('Unable to imort the gpg key');
+    })
   })
 })
