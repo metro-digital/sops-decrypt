@@ -28,7 +28,7 @@ describe('When SOPS pacakge does not exist in caching directory', () => {
     const version = '3.6.1';
     const dir = path.join(toolsDir, 'sops', version, os.arch());
 
-    await action.install('sops',fs.chmodSync, version)
+    await action.run()
 
     expect(fs.existsSync(path.join(dir, 'sops'))).toBe(true);
   }, 100000)

@@ -38,91 +38,6 @@ afterEach(()=>{
   mockSOPSDecrypt.mockReset()
 })
 
-describe('When getting the download URL for SOPS', () => {
-  let originalPlatform: string
-  beforeEach(() => {
-    originalPlatform = process.platform;
-  });
-
-  afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: originalPlatform
-    });
-  });
-
-  it('should get the right URL for windows platform', () => {
-    const version = '3.6.1';
-    setPlatform('win32')
-    let expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.exe`
-
-    let actualURL = action.downloadURL(version)
-
-    expect(actualURL).toEqual(expectedURL)
-  })
-
-  it('should get the right URL for linux platform', () => {
-    const version = '3.6.1';
-    setPlatform('linux')
-    let expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.linux`
-
-    let actualURL = action.downloadURL(version)
-
-    expect(actualURL).toEqual(expectedURL)
-  })
-
-  it('should get the right URL for darwin platform', () => {
-    const version = '3.6.1';
-    setPlatform('darwin')
-    let expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.darwin`
-
-    let actualURL = action.downloadURL(version)
-
-    expect(actualURL).toEqual(expectedURL)
-  })
-})
-
-describe('When SOPS is being downloaded', ()=> {
-  it('should download the tool if it is not cached in the runner', async ()=>{
-    const version = '3.6.1';
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('')
-
-    await action.download(version, 'sops', 'someextension', 'someurl')
-
-    expect(mockDownloadTool).toHaveBeenCalledWith('someurl');
-  })
-
-  it('should not download the tool if it is cached in the runner', async ()=>{
-    const version = '3.6.1';
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('binarypath')
-
-    await action.download(version, 'sops', 'someextension', 'someurl')
-
-    expect(mockDownloadTool).not.toHaveBeenCalled();
-  })
-})
-
-describe('When SOPS is being installed', ()=> {
-  it('should add execute premissions to the installed binary', async ()=>{
-    const version = '3.6.1';
-    mockCacheFile.mockResolvedValue('binarypath/version')
-
-    await action.install('sops', mockExecutePermission, version)
-
-    expect(mockExecutePermission).toHaveBeenCalledWith('binarypath/version/sops', '777');
-  })
-
-  it('should add the path of SOPS to PATH variable', async ()=>{
-    const version = '3.6.1';
-    mockCacheFile.mockResolvedValue('binarypath/version')
-
-    await action.install('sops', mockExecutePermission, version)
-
-    expect(mockAddPath).toHaveBeenCalledWith('binarypath/version');
-  })
-})
-
 describe('When decryption of secret file', ()=>{
   describe('is successful', ()=>{
     beforeEach(()=>{
@@ -182,9 +97,3 @@ describe('When decryption of secret file', ()=>{
     })
   })
 })
-
-function setPlatform(platform:string) {
-  Object.defineProperty(process, 'platform', {
-    value: platform
-  });
-}
