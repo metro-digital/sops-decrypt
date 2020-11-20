@@ -48,5 +48,10 @@ export async function download(version: string, toolName: string, extension:stri
 }
 
 export async function decrypt(base64_gpgKey: string) {
-  gpg.import_key(base64_gpgKey)
+  try {
+    await gpg.import_key(base64_gpgKey)
+  }
+  catch(e) {
+    throw new Error(`Failed decrypting the secret file: ${e.message}`)
+  }
 }

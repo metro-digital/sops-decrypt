@@ -2,7 +2,8 @@ import * as sops from '../../src/index';
 import * as core from '@actions/core';
 import * as toolsCache from '@actions/tool-cache';
 import { mocked } from 'ts-jest/utils';
-import * as gpg from '../../src/gpg'
+import * as gpg from '../../src/gpg';
+import { promises } from 'fs';
 
 jest.mock('@actions/core')
 jest.mock('@actions/tool-cache')
@@ -36,7 +37,7 @@ afterEach(()=>{
 describe('When getting the download URL for SOPS', () => {
   let originalPlatform: string
   beforeEach(() => {
-      originalPlatform = process.platform;
+    originalPlatform = process.platform;
   });
 
   afterEach(() => {
@@ -118,13 +119,29 @@ describe('When SOPS is being installed', ()=> {
   })
 })
 
-describe('When decrypting a secret file', ()=>{
-  it('should pass the right pgp key to import', ()=>{
-    let expectedGPGKey = 'sample_key'
+describe('When decrypting of a secret file', ()=>{
+  describe('is a success', ()=>{
+    it('should use the right PGP key importing', ()=>{
+      let expectedGPGKey = 'sample_key'
 
-    sops.decrypt(expectedGPGKey)
+      sops.decrypt(expectedGPGKey)
 
-    expect(mockGPGImport).toHaveBeenCalledWith(expectedGPGKey)
+      expect(mockGPGImport).toHaveBeenCalledWith(expectedGPGKey)
+    })
+  })
+
+  describe('is a failure', ()=>{
+    beforeEach(()=>{
+      mockGPGImport.mockReturnValue(new Promise((resolve,reject) => {
+        reject(new Error(`Error message from sops`))
+      }))
+    })
+
+    it('should return the error message', async ()=>{
+      let expectedErrorMsg = 'Failed decrypting the secret file: Error message from sops'
+
+      await expect(sops.decrypt('sample_key')).rejects.toThrowError(expectedErrorMsg);
+    })
   })
 })
 

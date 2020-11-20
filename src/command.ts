@@ -29,6 +29,6 @@ export async function exec(command: string, args: string[], stdin?: string) {
     output: output.trim(),
     error: error.trim()
   } as Result
-  console.log(`${result}`)
+
   return result
 }
