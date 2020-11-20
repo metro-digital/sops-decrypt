@@ -1,41 +1,44 @@
 import * as action from '../../src/index';
-import * as core from '@actions/core';
-import * as toolsCache from '@actions/tool-cache';
+import * as fs from 'fs'
 import { mocked } from 'ts-jest/utils';
 import * as gpg from '../../src/gpg';
-import * as sops from '../../src/sops'
+import * as sops from '../../src/sops';
 
-jest.mock('@actions/core')
-jest.mock('@actions/tool-cache')
-jest.mock('../../src/gpg')
 jest.mock('../../src/sops')
+jest.mock('../../src/gpg')
 
-let mockCacheFile: jest.Mock
-let mockDownloadTool: jest.Mock
-let mockFindTool: jest.Mock
-let mockAddPath: jest.Mock
-let mockExecutePermission: jest.Mock
 let mockGPGImport: jest.Mock
 let mockSOPSDecrypt: jest.Mock
+let mockSOPSInstall: jest.Mock
 
 beforeEach(()=>{
-  mockCacheFile = mocked(toolsCache.cacheFile, true)
-  mockDownloadTool = mocked(toolsCache.downloadTool, true)
-  mockFindTool = mocked(toolsCache.find, true)
-  mockAddPath = mocked(core.addPath, true)
-  mockExecutePermission = jest.fn()
   mockGPGImport = mocked(gpg.import_key, true)
   mockSOPSDecrypt = mocked(sops.decrypt, true)
+  mockSOPSInstall = mocked(sops.install, true)
 })
 
 afterEach(()=>{
-  mockCacheFile.mockReset()
-  mockDownloadTool.mockReset()
-  mockFindTool.mockReset()
-  mockAddPath.mockReset()
-  mockExecutePermission.mockReset()
   mockGPGImport.mockReset()
   mockSOPSDecrypt.mockReset()
+  mockSOPSInstall.mockReset()
+})
+
+describe('When the action is triggered', ()=>{
+  describe('passing the sops version', ()=>{
+    beforeEach(()=>{
+      process.env['INPUT_VERSION'] = 'goodVersion';
+    })
+
+    afterEach(()=>{
+      delete process.env['INPUT_VERSION'];
+    })
+
+    it('should install sops with version passed', async ()=>{
+      await action.run()
+
+      expect(mockSOPSInstall).toHaveBeenCalledWith('goodVersion', fs.chmodSync)
+    })
+  })
 })
 
 describe('When decryption of secret file', ()=>{

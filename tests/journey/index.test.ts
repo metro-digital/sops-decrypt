@@ -18,9 +18,14 @@ describe('When SOPS pacakge does not exist in caching directory', () => {
     jest.spyOn(core, 'addPath').mockImplementation(jest.fn())
   })
 
+  beforeEach(()=>{
+    process.env.INPUT_VERSION = '3.6.1'
+  })
+
   afterEach(async ()=>{
     delete process.env.RUNNER_TOOL_CACHE
     delete process.env.RUNNER_TEMP
+    delete process.env.INPUT_VERSION
     await io.rmRF(runnerDir)
   })
 
