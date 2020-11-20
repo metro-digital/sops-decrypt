@@ -43,7 +43,7 @@ describe('When importing of a gpg key',()=>{
       mockExec.mockReturnValue({
         status: false,
         output: 'imported',
-        error: 'Unable to imort the gpg key'
+        error: 'Error message from gpg'
       } as command.Result)
     })
 
@@ -52,7 +52,8 @@ describe('When importing of a gpg key',()=>{
     })
 
     it('should throw the error returned by the command', async ()=>{
-      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrowError('Unable to imort the gpg key');
+      let expectedErrorMsg = 'Importing of GPG key failed: Error message from gpg'
+      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrowError(expectedErrorMsg);
     })
   })
 })

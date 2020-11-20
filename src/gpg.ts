@@ -5,6 +5,6 @@ export async function import_key(base64_gpg_key: string) {
   gpgArgs.push('--import')
   let result: command.Result  = await command.exec('gpg', gpgArgs, gpg_key);
   if(!result.status) {
-    throw new Error(result.error);
+    throw new Error(`Importing of GPG key failed: ${result.error}`);
   }
 }
