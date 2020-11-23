@@ -5,12 +5,12 @@ import * as command from './command'
 
 const toolName = 'sops'
 
-export async function decrypt(secret_file: string) : Promise<any> {
+export async function decrypt(sops: string, secret_file: string) : Promise<command.Result> {
   let sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
   sopsArgs.push('--output-type', 'json')
   sopsArgs.push(secret_file)
-  let result: command.Result = await command.exec('sops', sopsArgs)
+  let result: command.Result = await command.exec(sops, sopsArgs)
   if(!result.status) {
     return new Promise((resolve,reject) => {
       reject(new Error(`Execution of sops command failed: ${result.error}`))
@@ -18,7 +18,7 @@ export async function decrypt(secret_file: string) : Promise<any> {
   }
 
   return new Promise((resolve,reject) => {
-    resolve()
+    resolve(result)
   })
 }
 
@@ -28,6 +28,7 @@ export async function install(version: string, chmod: Function) {
   let binaryPath = await download(version, extension, url);
   chmod(binaryPath, '777')
   core.addPath(path.dirname(binaryPath))
+  return binaryPath
 }
 
 export function downloadURL(version: string) {

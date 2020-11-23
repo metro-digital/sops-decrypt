@@ -1,4 +1,4 @@
-name: 'sops-decryption'
+name: 'sops-decrypt'
 description: 'Decrypt the given sops encrypted file'
 inputs:
   version:
@@ -13,7 +13,7 @@ inputs:
     required: true
 outputs:
   data:
-    description: 'Decrypted data'
+    description: 'Decrypted data in JSON'
 runs:
   using: 'node12'
   main: 'dist/index.js'

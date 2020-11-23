@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
 import * as action from '../../src/index';
-import * as gpg_keys from './fixtures/gpg_private_keys';
+import * as gpg_keys from './fixtures/gpg_private_keys'
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools');
@@ -12,20 +12,21 @@ const toolsTempDir = path.join(runnerDir, 'temp');
 
 process.env.RUNNER_TOOL_CACHE = toolsDir;
 process.env.RUNNER_TEMP = toolsTempDir;
+process.env.INPUT_VERSION = '3.6.1';
+process.env.INPUT_FILE = 'tests/journey/fixtures/sops_encrypted_file.yaml'
+process.env.INPUT_GPG_KEY = gpg_keys.base64_private_key1
 
-describe('When SOPS pacakge does not exist in caching directory', () => {
-  beforeAll(()=>{
+describe('When the action is triggered', () => {
+  let mockSetOutput: any
+  beforeAll(async ()=>{
     jest.spyOn(core, 'debug').mockImplementation(jest.fn())
     jest.spyOn(core, 'addPath').mockImplementation(jest.fn())
-  })
+    mockSetOutput = jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 
-  beforeEach(()=>{
-    process.env.INPUT_VERSION = '3.6.1'
-    process.env.INPUT_GPG_KEY = gpg_keys.base64_private_key1
-    process.env.INPUT_FILE = 'tests/journey/fixtures/sops_encrypted_file.yaml'
-  })
+    await action.run()
+  }, 100000)
 
-  afterEach(async ()=>{
+  afterAll(async ()=>{
     delete process.env.RUNNER_TOOL_CACHE
     delete process.env.RUNNER_TEMP
     delete process.env.INPUT_VERSION
@@ -35,11 +36,16 @@ describe('When SOPS pacakge does not exist in caching directory', () => {
   })
 
   it('should download the given version of SOPS pacakge', async () => {
-    const version = '3.6.1';
-    const dir = path.join(toolsDir, 'sops', version, os.arch());
-
-    await action.run()
+    const dir = path.join(toolsDir, 'sops', '3.6.1', os.arch());
 
     expect(fs.existsSync(path.join(dir, 'sops'))).toBe(true);
-  }, 100000)
+  })
+
+  it('should be able to set decrypted content as output', async () => {
+    let exepectedData = {
+      Hello: "world"
+    }
+
+    expect(mockSetOutput).toHaveBeenCalledWith('data', exepectedData)
+  })
 })

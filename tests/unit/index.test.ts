@@ -1,8 +1,10 @@
-import * as action from '../../src/index';
 import * as fs from 'fs'
 import { mocked } from 'ts-jest/utils';
+import * as core from '@actions/core';
+import * as action from '../../src/index';
 import * as gpg from '../../src/gpg';
 import * as sops from '../../src/sops';
+import * as command from '../../src/command';
 
 jest.mock('../../src/sops')
 jest.mock('../../src/gpg')
@@ -14,7 +16,8 @@ let mockSOPSInstall: jest.Mock
 beforeEach(()=>{
   mockGPGImport = mocked(gpg.import_key, true)
   mockSOPSDecrypt = mocked(sops.decrypt, true)
-  mockSOPSInstall = mocked(sops.install, true)
+  mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
+  jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 })
 
 afterEach(()=>{
@@ -31,6 +34,15 @@ describe('When the action is triggered', ()=>{
       process.env['INPUT_VERSION'] = 'goodVersion';
       process.env['INPUT_FILE'] = encrypted_file;
       process.env['INPUT_GPG_KEY'] = gpg_key;
+      mockSOPSDecrypt.mockReturnValue(new Promise((resolve,reject) => {
+        resolve({
+          status: true,
+          output: JSON.stringify({
+            sample: "data"
+          }),
+          error: ''
+        } as command.Result)
+      }))
     })
 
     afterEach(()=>{
@@ -52,9 +64,10 @@ describe('When the action is triggered', ()=>{
     })
 
     it('should decrypt the secret file passed', async ()=>{
+      mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
       await action.run()
 
-      expect(mockSOPSDecrypt).toHaveBeenCalledWith(encrypted_file)
+      expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file)
     })
   })
   describe('without passing a required key', ()=>{
