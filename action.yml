@@ -8,8 +8,8 @@ inputs:
   file:
     description: 'SOPS encrypted file to decrypt'
     required: true
-  pgp-key:
-    description: 'PGP key to decrypt the file'
+  gpg_key:
+    description: 'GPG key to decrypt the file'
     required: true
 outputs:
   data:

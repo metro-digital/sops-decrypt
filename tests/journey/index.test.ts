@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
 import * as action from '../../src/index';
+import * as gpg_keys from './fixtures/gpg_private_keys';
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools');
@@ -20,12 +21,16 @@ describe('When SOPS pacakge does not exist in caching directory', () => {
 
   beforeEach(()=>{
     process.env.INPUT_VERSION = '3.6.1'
+    process.env.INPUT_GPG_KEY = gpg_keys.base64_private_key1
+    process.env.INPUT_FILE = 'tests/journey/fixtures/sops_encrypted_file.yaml'
   })
 
   afterEach(async ()=>{
     delete process.env.RUNNER_TOOL_CACHE
     delete process.env.RUNNER_TEMP
     delete process.env.INPUT_VERSION
+    delete process.env.INPUT_GPG_KEY
+    delete process.env.INPUT_FILE
     await io.rmRF(runnerDir)
   })
 

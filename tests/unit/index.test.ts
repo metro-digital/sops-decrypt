@@ -24,13 +24,19 @@ afterEach(()=>{
 })
 
 describe('When the action is triggered', ()=>{
-  describe('passing the sops version', ()=>{
+  const encrypted_file = 'encrypted/file1'
+  const gpg_key = 'key1'
+  describe('by passing the required variables', ()=>{
     beforeEach(()=>{
       process.env['INPUT_VERSION'] = 'goodVersion';
+      process.env['INPUT_FILE'] = encrypted_file;
+      process.env['INPUT_GPG_KEY'] = gpg_key;
     })
 
     afterEach(()=>{
       delete process.env['INPUT_VERSION'];
+      delete process.env['INPUT_FILE'];
+      delete process.env['INPUT_GPG_KEY'];
     })
 
     it('should install sops with version passed', async ()=>{
@@ -38,39 +44,48 @@ describe('When the action is triggered', ()=>{
 
       expect(mockSOPSInstall).toHaveBeenCalledWith('goodVersion', fs.chmodSync)
     })
-  })
-})
 
-describe('When decryption of secret file', ()=>{
-  describe('is successful', ()=>{
+    it('should import the gpg key passed', async ()=>{
+      await action.run()
+
+      expect(mockGPGImport).toHaveBeenCalledWith(gpg_key)
+    })
+
+    it('should decrypt the secret file passed', async ()=>{
+      await action.run()
+
+      expect(mockSOPSDecrypt).toHaveBeenCalledWith(encrypted_file)
+    })
+  })
+  describe('without passing a required key', ()=>{
     beforeEach(()=>{
-      mockGPGImport.mockReturnValue(new Promise((resolve,reject) => {
-        resolve()
-      }))
-      mockSOPSDecrypt.mockReturnValue(new Promise((resolve,reject) => {
-        resolve()
-      }))
+      process.env['INPUT_VERSION'] = 'goodVersion';
+      process.env['INPUT_FILE'] = encrypted_file;
     })
 
-    it('should use the right PGP key importing', async ()=>{
-      let expectedGPGKey = 'sample_key'
-      let secretFile = 'encrypted_file.yaml'
-
-      await action.decrypt(expectedGPGKey, secretFile)
-
-      expect(mockGPGImport).toHaveBeenCalledWith(expectedGPGKey)
+    afterEach(()=>{
+      delete process.env['INPUT_VERSION'];
+      delete process.env['INPUT_FILE'];
     })
+    it('should throw an error', async ()=>{
+      let expectedErrorMsg = 'Failed decrypting the secret file: Input required and not supplied: gpg_key'
 
-    it('should use the right encrypted file to decrypt', async ()=>{
-      let secretFile = 'encrypted_file.yaml'
-
-      await action.decrypt('sample_gpg_key', secretFile)
-
-      expect(mockSOPSDecrypt).toHaveBeenCalledWith(secretFile)
+      await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
     })
   })
+  describe('an error is occured', ()=>{
+    beforeEach(()=>{
+      process.env['INPUT_VERSION'] = 'goodVersion';
+      process.env['INPUT_FILE'] = encrypted_file;
+      process.env['INPUT_GPG_KEY'] = gpg_key;
+    })
 
-  describe('is a failure', ()=>{
+    afterEach(()=>{
+      delete process.env['INPUT_VERSION'];
+      delete process.env['INPUT_FILE'];
+      delete process.env['INPUT_GPG_KEY'];
+    })
+
     describe('when importing a gpg key', ()=>{
       beforeEach(()=>{
         mockGPGImport.mockReturnValue(new Promise((resolve,reject) => {
@@ -81,11 +96,11 @@ describe('When decryption of secret file', ()=>{
       it('should return the error message', async ()=>{
         let expectedErrorMsg = 'Failed decrypting the secret file: Error message from gpg'
 
-        await expect(action.decrypt('sample_gpg_key', 'secret_file.yaml')).rejects.toThrowError(expectedErrorMsg);
+        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
       })
     })
 
-    describe('when execution of sops command fails', ()=>{
+    describe('when decrypting a secret file', ()=>{
       beforeEach(()=>{
         mockSOPSDecrypt.mockReturnValue(new Promise((resolve,reject) => {
           reject(new Error(`Error message from sops`))
@@ -95,7 +110,7 @@ describe('When decryption of secret file', ()=>{
       it('should return the error message', async ()=>{
         let expectedErrorMsg = 'Failed decrypting the secret file: Error message from sops'
 
-        await expect(action.decrypt('sample_gpg_key', 'secret_file.yaml')).rejects.toThrowError(expectedErrorMsg);
+        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
       })
     })
   })
