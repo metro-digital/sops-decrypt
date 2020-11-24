@@ -10,11 +10,13 @@ jest.mock('../../src/sops')
 jest.mock('../../src/gpg')
 
 let mockGPGImport: jest.Mock
+let mockGPGDelete: jest.Mock
 let mockSOPSDecrypt: jest.Mock
 let mockSOPSInstall: jest.Mock
 
 beforeEach(()=>{
   mockGPGImport = mocked(gpg.import_key, true)
+  mockGPGDelete = mocked(gpg.delete_key, true)
   mockSOPSDecrypt = mocked(sops.decrypt, true)
   mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
   jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
@@ -22,6 +24,7 @@ beforeEach(()=>{
 
 afterEach(()=>{
   mockGPGImport.mockReset()
+  mockGPGDelete.mockReset()
   mockSOPSDecrypt.mockReset()
   mockSOPSInstall.mockReset()
 })
@@ -69,6 +72,12 @@ describe('When the action is triggered', ()=>{
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file)
     })
+
+    it('should delete the gpg key imported', async()=>{
+      await action.run()
+
+      expect(mockGPGDelete).toHaveBeenCalledWith(gpg_key)
+    })
   })
   describe('without passing a required key', ()=>{
     beforeEach(()=>{
@@ -81,7 +90,7 @@ describe('When the action is triggered', ()=>{
       delete process.env['INPUT_FILE'];
     })
     it('should throw an error', async ()=>{
-      let expectedErrorMsg = 'Failed decrypting the secret file: Input required and not supplied: gpg_key'
+      let expectedErrorMsg = 'Input required and not supplied: gpg_key'
 
       await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
     })

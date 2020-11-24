@@ -85,3 +85,59 @@ describe('When getting fingerprint of a gpg key',()=>{
     })
   })
 })
+
+describe('When getting deleting the secret gpg key',()=>{
+  describe('is successful', ()=>{
+    beforeEach(()=>{
+      mockExec.mockReturnValue({
+        status: true,
+        output: '',
+        error: ''
+      } as command.Result)
+    })
+
+    it('should pass the right arguments', async ()=>{
+      let expectedArgs: string[] = [];
+      expectedArgs.push('--batch')
+      expectedArgs.push('--yes')
+      expectedArgs.push('--delete-secret-keys')
+      expectedArgs.push('sample_fpr')
+
+      await gpg.delete_secret_key('sample_fpr')
+
+      expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs)
+    })
+
+    it('should not throw an error', async ()=>{
+      await expect(gpg.delete_secret_key('sample_fpr')).resolves.not.toThrow();
+    })
+  })
+})
+
+describe('When getting deleting the public gpg key',()=>{
+  describe('is successful', ()=>{
+    beforeEach(()=>{
+      mockExec.mockReturnValue({
+        status: true,
+        output: '',
+        error: ''
+      } as command.Result)
+    })
+
+    it('should pass the right arguments', async ()=>{
+      let expectedArgs: string[] = [];
+      expectedArgs.push('--batch')
+      expectedArgs.push('--yes')
+      expectedArgs.push('--delete-keys')
+      expectedArgs.push('sample_fpr')
+
+      await gpg.delete_public_key('sample_fpr')
+
+      expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs)
+    })
+
+    it('should not throw an error', async ()=>{
+      await expect(gpg.delete_public_key('sample_fpr')).resolves.not.toThrow();
+    })
+  })
+})

@@ -6,13 +6,13 @@ import * as sops from './sops'
 import * as command from './command'
 
 export async function run() {
+  const required: InputOptions = {
+    required: true
+  }
+  const version: string = core.getInput('version', required)
+  const gpg_key: string = core.getInput('gpg_key', required)
+  const encrypted_file: string = core.getInput('file', required)
   try {
-    const required: InputOptions = {
-      required: true
-    }
-    const version: string = core.getInput('version', required)
-    const gpg_key: string = core.getInput('gpg_key', required)
-    const encrypted_file: string = core.getInput('file', required)
     let sopsPath = await sops.install(version, fs.chmodSync)
     await gpg.import_key(gpg_key)
     let result: command.Result = await sops.decrypt(sopsPath, encrypted_file)
@@ -22,5 +22,8 @@ export async function run() {
   }
   catch(e) {
     throw new Error(`Failed decrypting the secret file: ${e.message}`)
+  }
+  finally{
+    await gpg.delete_key(gpg_key)
   }
 }

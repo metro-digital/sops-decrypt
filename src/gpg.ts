@@ -39,3 +39,49 @@ export async function fingerprint(base64_gpg_key: string) : Promise<string> {
     resolve(fpr)
   })
 }
+
+export async function delete_secret_key(fingerprint: string) : Promise<any> {
+  let gpgArgs: Array<string> = [];
+  gpgArgs.push('--batch')
+  gpgArgs.push('--yes')
+  gpgArgs.push('--delete-secret-keys')
+  gpgArgs.push(fingerprint)
+
+
+  const result: command.Result  = await command.exec('gpg', gpgArgs);
+  if(!result.status) {
+    return new Promise((resolve,reject) => {
+      reject(new Error(`Deleting private GPG key failed: ${result.error}`))
+    })
+  }
+
+  return new Promise((resolve,reject) => {
+    resolve()
+  })
+}
+
+export async function delete_public_key(fingerprint: string) : Promise<any> {
+  let gpgArgs: Array<string> = [];
+  gpgArgs.push('--batch')
+  gpgArgs.push('--yes')
+  gpgArgs.push('--delete-keys')
+  gpgArgs.push(fingerprint)
+
+
+  const result: command.Result  = await command.exec('gpg', gpgArgs);
+  if(!result.status) {
+    return new Promise((resolve,reject) => {
+      reject(new Error(`Deleting gpg public key failed: ${result.error}`))
+    })
+  }
+
+  return new Promise((resolve,reject) => {
+    resolve()
+  })
+}
+
+export async function delete_key(gpg_key: string) : Promise<any> {
+  let fpr = await fingerprint(gpg_key)
+  await delete_secret_key(fpr)
+  await delete_public_key(fpr)
+}
