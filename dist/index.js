@@ -1030,7 +1030,7 @@ exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exp
 const command = __importStar(__webpack_require__(233));
 function import_key(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpg_key = atob(base64_gpg_key);
+        let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
         gpgArgs.push('--import');
         const result = yield command.exec('gpg', gpgArgs, gpg_key);
@@ -1047,7 +1047,7 @@ function import_key(base64_gpg_key) {
 exports.import_key = import_key;
 function fingerprint(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpg_key = atob(base64_gpg_key);
+        let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
         gpgArgs.push('--with-colons');
         gpgArgs.push('--import-options', 'show-only');
@@ -1208,7 +1208,7 @@ function run() {
             }
         }
         catch (e) {
-            core.setFailed("Error occured while executing the action");
+            core.setFailed(`Error occured while executing the action ${e.message}`);
             throw new Error(`Failed decrypting the secret file: ${e.message}`);
         }
         finally {

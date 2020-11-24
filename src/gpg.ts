@@ -1,7 +1,7 @@
 import * as command from './command'
 
 export async function import_key(base64_gpg_key: string) : Promise<any> {
-  let gpg_key: string = atob(base64_gpg_key)
+  let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--import')
 
@@ -18,7 +18,7 @@ export async function import_key(base64_gpg_key: string) : Promise<any> {
 }
 
 export async function fingerprint(base64_gpg_key: string) : Promise<string> {
-  let gpg_key: string = atob(base64_gpg_key)
+  let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--with-colons')
   gpgArgs.push('--import-options', 'show-only')

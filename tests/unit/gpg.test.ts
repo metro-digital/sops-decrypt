@@ -28,13 +28,13 @@ describe('When importing of a gpg key',()=>{
       let expectedArgs: string[] = [];
       expectedArgs.push('--import')
 
-      await gpg.import_key(btoa('sample_gpg_key'))
+      await gpg.import_key(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async ()=>{
-      await expect(gpg.import_key(btoa('sample_gpg_key'))).resolves.not.toThrow();
+      await expect(gpg.import_key(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
     })
   })
 
@@ -48,12 +48,12 @@ describe('When importing of a gpg key',()=>{
     })
 
     it('should throw an error', async ()=>{
-      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrow();
+      await expect(gpg.import_key(base64Encode('sample_gpg_key'))).rejects.toThrow();
     })
 
     it('should throw the error returned by the command', async ()=>{
       let expectedErrorMsg = 'Importing of GPG key failed: Error message from gpg'
-      await expect(gpg.import_key(btoa('sample_gpg_key'))).rejects.toThrowError(expectedErrorMsg);
+      await expect(gpg.import_key(base64Encode('sample_gpg_key'))).rejects.toThrowError(expectedErrorMsg);
     })
   })
 })
@@ -75,13 +75,13 @@ describe('When getting fingerprint of a gpg key',()=>{
       expectedArgs.push('--import')
       expectedArgs.push('--fingerprint')
 
-      await gpg.fingerprint(btoa('sample_gpg_key'))
+      await gpg.fingerprint(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async ()=>{
-      await expect(gpg.fingerprint(btoa('sample_gpg_key'))).resolves.not.toThrow();
+      await expect(gpg.fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
     })
   })
 })
@@ -141,3 +141,7 @@ describe('When getting deleting the public gpg key',()=>{
     })
   })
 })
+
+function base64Encode(key: string) {
+  return Buffer.from(key).toString('base64')
+}

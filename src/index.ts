@@ -25,7 +25,7 @@ export async function run() {
     }
   }
   catch(e) {
-    core.setFailed("Error occured while executing the action")
+    core.setFailed(`Error occured while executing the action ${e.message}`)
     throw new Error(`Failed decrypting the secret file: ${e.message}`)
   }
   finally{
