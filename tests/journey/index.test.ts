@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
 import * as action from '../../src/index';
-import * as gpg_keys from './fixtures/gpg_private_keys'
+import * as gpg_keys from '../fixtures/gpg_private_keys'
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools');
@@ -13,7 +13,7 @@ const toolsTempDir = path.join(runnerDir, 'temp');
 process.env.RUNNER_TOOL_CACHE = toolsDir;
 process.env.RUNNER_TEMP = toolsTempDir;
 process.env.INPUT_VERSION = '3.6.1';
-process.env.INPUT_FILE = 'tests/journey/fixtures/sops_encrypted_file.yaml'
+process.env.INPUT_FILE = 'tests/fixtures/sops_encrypted_file.yaml'
 process.env.INPUT_GPG_KEY = gpg_keys.base64_private_key1
 
 describe('When the action is triggered', () => {

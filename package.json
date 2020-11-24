@@ -6,6 +6,7 @@
   "scripts": {
     "build": "ncc build src/index.ts",
     "unitTests": "jest tests/unit/*.test.ts",
+    "integrationTests": "jest tests/integration/index.test.ts",
     "journeyTests": "jest tests/journey/index.test.ts",
     "test": "jest",
     "format": "prettier --write **/*.ts"

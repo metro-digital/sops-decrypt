@@ -57,3 +57,31 @@ describe('When importing of a gpg key',()=>{
     })
   })
 })
+
+describe('When getting fingerprint of a gpg key',()=>{
+  describe('is successful', ()=>{
+    beforeEach(()=>{
+      mockExec.mockReturnValue({
+        status: true,
+        output: 'sample_fpr',
+        error: ''
+      } as command.Result)
+    })
+
+    it('should pass the right arguments', async ()=>{
+      let expectedArgs: string[] = [];
+      expectedArgs.push('--with-colons')
+      expectedArgs.push('--import-options', 'show-only')
+      expectedArgs.push('--import')
+      expectedArgs.push('--fingerprint')
+
+      await gpg.fingerprint(btoa('sample_gpg_key'))
+
+      expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
+    })
+
+    it('should not throw an error', async ()=>{
+      await expect(gpg.fingerprint(btoa('sample_gpg_key'))).resolves.not.toThrow();
+    })
+  })
+})
