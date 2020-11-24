@@ -1,5 +1,7 @@
 # SOPS Decrypt action
 
+![test suite](https://github.com/metro-digital-inner-source/sops-decrypt/workflows/Tests/badge.svg)
+
 A GitHub action that can be used to decrypt a SOPS encrypted file.
 
 ## Inputs
