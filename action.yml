@@ -3,8 +3,7 @@ description: 'Decrypt the given sops encrypted file'
 inputs:
   version:
     description: 'Version of SOPS to be used'
-    required: false
-    default: latest
+    required: true
   file:
     description: 'SOPS encrypted file to decrypt'
     required: true
