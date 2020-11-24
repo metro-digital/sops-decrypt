@@ -14,12 +14,15 @@ let mockGPGDelete: jest.Mock
 let mockSOPSDecrypt: jest.Mock
 let mockSOPSInstall: jest.Mock
 
+jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
+jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
+jest.spyOn(core, 'info').mockImplementation(jest.fn())
+
 beforeEach(()=>{
   mockGPGImport = mocked(gpg.import_key, true)
   mockGPGDelete = mocked(gpg.delete_key, true)
   mockSOPSDecrypt = mocked(sops.decrypt, true)
   mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
-  jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 })
 
 afterEach(()=>{
