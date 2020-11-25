@@ -47,7 +47,7 @@ jobs:
       run: |
         npm run journeyTests
   sonarqube-scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [unit-tests, integration-tests, journey-tests]
     steps:
     - name: checkout repo
