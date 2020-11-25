@@ -9,6 +9,7 @@
     "integrationTests": "jest tests/integration/index.test.ts",
     "journeyTests": "jest tests/journey/index.test.ts",
     "test": "jest",
+    "testCoverage": "jest --coverage",
     "format": "prettier --write **/*.ts"
   },
   "repository": {
