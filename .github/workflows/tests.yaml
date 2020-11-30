@@ -66,4 +66,3 @@ jobs:
       with:
         host: ${{ secrets.SONARQUBE_URL }}
         login: ${{ secrets.SONARQUBE_TOKEN }}
-    
