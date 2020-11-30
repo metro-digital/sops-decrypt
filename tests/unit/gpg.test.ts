@@ -75,13 +75,13 @@ describe('When getting fingerprint of a gpg key',()=>{
       expectedArgs.push('--import')
       expectedArgs.push('--fingerprint')
 
-      await gpg.fingerprint(base64Encode('sample_gpg_key'))
+      await gpg.get_fingerprint(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async ()=>{
-      await expect(gpg.fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
+      await expect(gpg.get_fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
     })
   })
 })

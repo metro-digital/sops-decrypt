@@ -1026,7 +1026,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.fingerprint = exports.import_key = void 0;
+exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.get_fingerprint = exports.import_key = void 0;
 const command = __importStar(__webpack_require__(233));
 function import_key(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1045,7 +1045,7 @@ function import_key(base64_gpg_key) {
     });
 }
 exports.import_key = import_key;
-function fingerprint(base64_gpg_key) {
+function get_fingerprint(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
@@ -1062,13 +1062,13 @@ function fingerprint(base64_gpg_key) {
         let fingerprints = gpgResult.output;
         let matchingString = "fpr";
         let fingerprint = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split("\n")[0];
-        let fpr = fingerprint.replace(/[^a-zA-Z0-9]/g, '');
+        fingerprint = fingerprint.replace(/[^a-zA-Z0-9]/g, '');
         return new Promise((resolve, reject) => {
-            resolve(fpr);
+            resolve(fingerprint);
         });
     });
 }
-exports.fingerprint = fingerprint;
+exports.get_fingerprint = get_fingerprint;
 function delete_secret_key(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpgArgs = [];
@@ -1109,9 +1109,9 @@ function delete_public_key(fingerprint) {
 exports.delete_public_key = delete_public_key;
 function delete_key(gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
-        let fpr = yield fingerprint(gpg_key);
-        yield delete_secret_key(fpr);
-        yield delete_public_key(fpr);
+        let fingerprint = yield get_fingerprint(gpg_key);
+        yield delete_secret_key(fingerprint);
+        yield delete_public_key(fingerprint);
     });
 }
 exports.delete_key = delete_key;

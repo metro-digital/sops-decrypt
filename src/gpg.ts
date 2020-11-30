@@ -17,7 +17,7 @@ export async function import_key(base64_gpg_key: string) : Promise<any> {
   })
 }
 
-export async function fingerprint(base64_gpg_key: string) : Promise<string> {
+export async function get_fingerprint(base64_gpg_key: string) : Promise<string> {
   let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--with-colons')
@@ -33,10 +33,10 @@ export async function fingerprint(base64_gpg_key: string) : Promise<string> {
 
   let fingerprints = gpgResult.output
   let matchingString = "fpr"
-  let fingerprint = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split("\n")[0];
-  let fpr = fingerprint.replace(/[^a-zA-Z0-9]/g,'');
+  let fingerprint: string = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split("\n")[0];
+  fingerprint = fingerprint.replace(/[^a-zA-Z0-9]/g,'');
   return new Promise((resolve,reject) => {
-    resolve(fpr)
+    resolve(fingerprint)
   })
 }
 
@@ -81,7 +81,7 @@ export async function delete_public_key(fingerprint: string) : Promise<any> {
 }
 
 export async function delete_key(gpg_key: string) : Promise<any> {
-  let fpr = await fingerprint(gpg_key)
-  await delete_secret_key(fpr)
-  await delete_public_key(fpr)
+  let fingerprint: string = await get_fingerprint(gpg_key)
+  await delete_secret_key(fingerprint)
+  await delete_public_key(fingerprint)
 }
