@@ -17,6 +17,7 @@ let mockSOPSInstall: jest.Mock
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
+jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
 beforeEach(()=>{
   mockGPGImport = mocked(gpg.import_key, true)
@@ -74,12 +75,6 @@ describe('When the action is triggered', ()=>{
       await action.run()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file)
-    })
-
-    it('should delete the gpg key imported', async()=>{
-      await action.run()
-
-      expect(mockGPGDelete).toHaveBeenCalledWith(gpg_key)
     })
   })
   describe('without passing a required key', ()=>{

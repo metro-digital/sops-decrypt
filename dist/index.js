@@ -1199,6 +1199,7 @@ function run() {
             let sopsPath = yield sops.install(version, fs.chmodSync);
             core.info('Importing the gpg key');
             yield gpg.import_key(gpg_key);
+            core.saveState("GPG_KEY", gpg_key);
             core.info('Imported the gpg key');
             core.info('Decrypting the secrets');
             let result = yield sops.decrypt(sopsPath, encrypted_file);
@@ -1210,11 +1211,6 @@ function run() {
         catch (e) {
             core.setFailed(`Error occured while executing the action ${e.message}`);
             throw new Error(`Failed decrypting the secret file: ${e.message}`);
-        }
-        finally {
-            core.info("Deleting the gpg key imported");
-            yield gpg.delete_key(gpg_key);
-            core.info("Deleted the gpg key imported");
         }
     });
 }

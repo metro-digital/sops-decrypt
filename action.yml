@@ -16,3 +16,4 @@ outputs:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+  post: 'dist/post-action/index.js'

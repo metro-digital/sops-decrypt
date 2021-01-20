@@ -10,6 +10,7 @@ jest.spyOn(core, 'debug').mockImplementation(jest.fn())
 jest.spyOn(core, 'addPath').mockImplementation(jest.fn())
 jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
+jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 let mockSetOutput = jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 
 const runnerDir = path.join(__dirname, 'runner')
