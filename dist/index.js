@@ -1195,17 +1195,27 @@ function run() {
         const version = core.getInput('version', required);
         const gpg_key = core.getInput('gpg_key', required);
         const encrypted_file = core.getInput('file', required);
+        const output_type = core.getInput('output_type');
         try {
+            let format = 'json';
+            if (output_type !== '') {
+                format = output_type;
+            }
             let sopsPath = yield sops.install(version, fs.chmodSync);
             core.info('Importing the gpg key');
             yield gpg.import_key(gpg_key);
             core.saveState("GPG_KEY", gpg_key);
             core.info('Imported the gpg key');
             core.info('Decrypting the secrets');
-            let result = yield sops.decrypt(sopsPath, encrypted_file);
+            core.info(`Selected output format: ${format}`);
+            let result = yield sops.decrypt(sopsPath, encrypted_file, format);
+            let output = result.output;
             if (result.status) {
                 core.info('Successfully decrypted the secrets');
-                core.setOutput('data', JSON.parse(result.output));
+                if (format === 'json') {
+                    output = JSON.parse(result.output);
+                }
+                core.setOutput('data', output);
             }
         }
         catch (e) {
@@ -2898,11 +2908,11 @@ const toolCache = __importStar(__webpack_require__(913));
 const path = __importStar(__webpack_require__(622));
 const command = __importStar(__webpack_require__(233));
 const toolName = 'sops';
-function decrypt(sops, secret_file) {
+function decrypt(sops, secret_file, output_type) {
     return __awaiter(this, void 0, void 0, function* () {
         let sopsArgs = [];
         sopsArgs.push('--decrypt');
-        sopsArgs.push('--output-type', 'json');
+        sopsArgs.push('--output-type', output_type);
         sopsArgs.push(secret_file);
         let result = yield command.exec(sops, sopsArgs);
         if (!result.status) {

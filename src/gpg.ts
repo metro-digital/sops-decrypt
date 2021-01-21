@@ -1,6 +1,6 @@
 import * as command from './command'
 
-export async function import_key(base64_gpg_key: string) : Promise<any> {
+export async function import_key(base64_gpg_key: string) : Promise<void> {
   let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--import')
@@ -40,7 +40,7 @@ export async function get_fingerprint(base64_gpg_key: string) : Promise<string> 
   })
 }
 
-export async function delete_secret_key(fingerprint: string) : Promise<any> {
+export async function delete_secret_key(fingerprint: string) : Promise<void> {
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--batch')
   gpgArgs.push('--yes')
@@ -60,7 +60,7 @@ export async function delete_secret_key(fingerprint: string) : Promise<any> {
   })
 }
 
-export async function delete_public_key(fingerprint: string) : Promise<any> {
+export async function delete_public_key(fingerprint: string) : Promise<void> {
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--batch')
   gpgArgs.push('--yes')

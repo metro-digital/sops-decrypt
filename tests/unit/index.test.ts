@@ -74,7 +74,7 @@ describe('When the action is triggered', ()=>{
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
       await action.run()
 
-      expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file)
+      expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file, 'json')
     })
   })
   describe('without passing a required key', ()=>{

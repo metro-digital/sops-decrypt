@@ -136,13 +136,13 @@ describe('When execution of sops command',()=>{
       expectedArgs.push('--output-type', 'json')
       expectedArgs.push(secretFile)
 
-      await sops.decrypt('sops', secretFile)
+      await sops.decrypt('sops', secretFile, 'json')
 
       expect(mockExec).toHaveBeenCalledWith('sops', expectedArgs)
     })
 
     it('should not throw an error', async ()=>{
-      await expect(sops.decrypt('sops', secretFile)).resolves.not.toThrow();
+      await expect(sops.decrypt('sops', secretFile, 'json')).resolves.not.toThrow();
     })
   })
 
@@ -156,12 +156,12 @@ describe('When execution of sops command',()=>{
     })
 
     it('should throw an error', async ()=>{
-      await expect(sops.decrypt('sops',secretFile)).rejects.toThrow();
+      await expect(sops.decrypt('sops',secretFile, '')).rejects.toThrow();
     })
 
     it('should throw the error returned by the command', async ()=>{
       let expectedErrorMsg = 'Execution of sops command failed: Error message from SOPS'
-      await expect(sops.decrypt('sops',secretFile)).rejects.toThrowError(expectedErrorMsg);
+      await expect(sops.decrypt('sops',secretFile, '')).rejects.toThrowError(expectedErrorMsg);
     })
   })
 })

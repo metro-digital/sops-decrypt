@@ -5,10 +5,10 @@ import * as command from './command'
 
 const toolName = 'sops'
 
-export async function decrypt(sops: string, secret_file: string) : Promise<command.Result> {
+export async function decrypt(sops: string, secret_file: string, output_type: string) : Promise<command.Result> {
   let sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
-  sopsArgs.push('--output-type', 'json')
+  sopsArgs.push('--output-type', output_type)
   sopsArgs.push(secret_file)
   let result: command.Result = await command.exec(sops, sopsArgs)
   if(!result.status) {
