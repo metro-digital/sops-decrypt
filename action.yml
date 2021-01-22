@@ -12,6 +12,7 @@ inputs:
     required: true
   output_type:
     description: 'Output format of the decrypted data'
+    default: 'json'
 outputs:
   data:
     description: 'Decrypted data in JSON'

@@ -15,7 +15,7 @@ jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
 beforeEach(()=>{
   mockGPGDelete = mocked(gpg.delete_key, true)
-  mockFingerprint = mocked(gpg.get_fingerprint, true)
+  mockFingerprint = mocked(gpg.fingerprint, true)
   mockKeyExists = mocked(gpg.key_exists, true)
 })
 
@@ -34,7 +34,7 @@ describe('When the post action is triggered', ()=>{
   afterEach(()=>{
     delete process.env['STATE_GPG_KEY'];
   })
-  describe('When gpg key is present', ()=>{
+  describe('when gpg key is present', ()=>{
     beforeEach(()=>{
       mockKeyExists.mockResolvedValue(true)
     })
@@ -46,7 +46,7 @@ describe('When the post action is triggered', ()=>{
       expect(mockGPGDelete).toHaveBeenCalledWith('fpr')
     })
   })
-  describe('When gpg key is not present', ()=>{
+  describe('when gpg key is not present', ()=>{
     beforeEach(()=>{
       mockKeyExists.mockResolvedValue(false)
     })

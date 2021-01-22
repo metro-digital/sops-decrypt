@@ -1,8 +1,13 @@
 import * as gpg from '../../src/gpg'
+import * as core from '@actions/core';
 import * as command from '../../src/command'
 import { mocked } from 'ts-jest/utils';
 
 jest.mock('../../src/command')
+jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
+jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
+jest.spyOn(core, 'info').mockImplementation(jest.fn())
+jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
 let mockExec: jest.Mock
 
@@ -75,13 +80,13 @@ describe('When getting fingerprint of a gpg key',()=>{
       expectedArgs.push('--import')
       expectedArgs.push('--fingerprint')
 
-      await gpg.get_fingerprint(base64Encode('sample_gpg_key'))
+      await gpg.fingerprint(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async ()=>{
-      await expect(gpg.get_fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
+      await expect(gpg.fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow();
     })
   })
 })

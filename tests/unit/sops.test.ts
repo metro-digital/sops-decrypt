@@ -166,6 +166,25 @@ describe('When execution of sops command',()=>{
   })
 })
 
+describe('When getting the output format',()=>{
+  describe('if format is not specified', ()=>{
+    it('should return json as default', async ()=>{
+      let expected = 'json'
+
+      let actual = await sops.getOutputFormat('')
+
+      expect(actual).toStrictEqual(expected)
+    })
+  })
+  describe('If format is not supported by the action', ()=>{
+    it('should throw an error', async ()=>{
+      let output_type = 'file'
+      let expectedErrorMsg = `Output type "${output_type}" is not supporterd by sops-decrypt`
+      await expect(sops.getOutputFormat(output_type)).rejects.toThrowError(expectedErrorMsg)
+    })
+  })
+})
+
 function setPlatform(platform:string) {
   Object.defineProperty(process, 'platform', {
     value: platform

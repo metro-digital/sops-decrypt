@@ -1,23 +1,28 @@
 import * as command from './command'
+import * as core from '@actions/core'
 
 export async function import_key(base64_gpg_key: string) : Promise<void> {
   let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--import')
 
+  core.info('Importing the gpg key')
   const result: command.Result  = await command.exec('gpg', gpgArgs, gpg_key);
   if(!result.status) {
+    core.info('Failed importing the GPG key')
     return new Promise((resolve,reject) => {
       reject(new Error(`Importing of GPG key failed: ${result.error}`))
     })
   }
 
+  core.info('Successfully imported the gpg key')
+  core.saveState('GPG_KEY', base64_gpg_key)
   return new Promise((resolve,reject) => {
     resolve()
   })
 }
 
-export async function get_fingerprint(base64_gpg_key: string) : Promise<string> {
+export async function fingerprint(base64_gpg_key: string) : Promise<string> {
   let gpg_key: string = Buffer.from(base64_gpg_key, 'base64').toString()
   let gpgArgs: Array<string> = [];
   gpgArgs.push('--with-colons')

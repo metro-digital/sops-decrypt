@@ -1,5 +1,9 @@
 import * as gpg from '../../src/gpg';
-import * as gpg_keys from '../fixtures/gpg_private_keys'
+import * as core from '@actions/core';
+import * as gpg_keys from '../fixtures/gpg_private_keys';
+
+jest.spyOn(core, 'info').mockImplementation(jest.fn())
+jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
 describe('When deleting the gpg key', () => {
   beforeEach(async()=>{
@@ -8,7 +12,7 @@ describe('When deleting the gpg key', () => {
 
   it('should be able to get the fingerprint of the key passed', async ()=>{
     let expectedFPR = gpg_keys.private_key1_fpr
-    let actualFPR = await gpg.get_fingerprint(gpg_keys.base64_private_key1)
+    let actualFPR = await gpg.fingerprint(gpg_keys.base64_private_key1)
 
     expect(actualFPR).toEqual(expectedFPR)
   })

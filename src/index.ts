@@ -3,7 +3,6 @@ import { InputOptions } from '@actions/core'
 import * as fs from 'fs'
 import * as gpg from './gpg'
 import * as sops from './sops'
-import * as command from './command'
 
 export async function run() {
   const required: InputOptions = {
@@ -14,28 +13,15 @@ export async function run() {
   const encrypted_file: string = core.getInput('file', required)
   const output_type: string = core.getInput('output_type')
   try {
-    let format = 'json'
-    if(output_type !== '') {
-      format = output_type
-    }
-
+    let outputFormat = await sops.getOutputFormat(output_type)
     let sopsPath = await sops.install(version, fs.chmodSync)
-    core.info('Importing the gpg key')
     await gpg.import_key(gpg_key)
-    core.saveState("GPG_KEY", gpg_key)
-    core.info('Imported the gpg key')
-    core.info('Decrypting the secrets')
-    core.info(`Selected output format: ${format}`)
-    let result: command.Result = await sops.decrypt(sopsPath, encrypted_file, format)
-    let output: any = result.output
-    if (result.status) {
-      core.info('Successfully decrypted the secrets')
-      if (format === 'json') {
-        output = JSON.parse(result.output)
-      }
-
-      core.setOutput('data', output)
+    let result: string = await sops.decrypt(sopsPath, encrypted_file, outputFormat)
+    if (outputFormat === sops.OutputFormat.JSON) {
+      result = JSON.parse(result)
     }
+
+    core.setOutput('data', result)
   }
   catch(e) {
     core.setFailed(`Error occured while executing the action ${e.message}`)
