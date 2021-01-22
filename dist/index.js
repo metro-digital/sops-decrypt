@@ -1026,7 +1026,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.get_fingerprint = exports.import_key = void 0;
+exports.key_exists = exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.get_fingerprint = exports.import_key = void 0;
 const command = __importStar(__webpack_require__(233));
 function import_key(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1107,14 +1107,22 @@ function delete_public_key(fingerprint) {
     });
 }
 exports.delete_public_key = delete_public_key;
-function delete_key(gpg_key) {
+function delete_key(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        let fingerprint = yield get_fingerprint(gpg_key);
         yield delete_secret_key(fingerprint);
         yield delete_public_key(fingerprint);
     });
 }
 exports.delete_key = delete_key;
+function key_exists(fingerprint) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let gpgArgs = [];
+        gpgArgs.push('--list-secret-keys', fingerprint);
+        const result = yield command.exec('gpg', gpgArgs);
+        return result.status;
+    });
+}
+exports.key_exists = key_exists;
 
 
 /***/ }),

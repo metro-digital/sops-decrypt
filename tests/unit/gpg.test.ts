@@ -86,7 +86,7 @@ describe('When getting fingerprint of a gpg key',()=>{
   })
 })
 
-describe('When getting deleting the secret gpg key',()=>{
+describe('When deleting the secret gpg key',()=>{
   describe('is successful', ()=>{
     beforeEach(()=>{
       mockExec.mockReturnValue({
@@ -114,7 +114,7 @@ describe('When getting deleting the secret gpg key',()=>{
   })
 })
 
-describe('When getting deleting the public gpg key',()=>{
+describe('When deleting the public gpg key',()=>{
   describe('is successful', ()=>{
     beforeEach(()=>{
       mockExec.mockReturnValue({

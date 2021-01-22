@@ -47,7 +47,6 @@ export async function delete_secret_key(fingerprint: string) : Promise<void> {
   gpgArgs.push('--delete-secret-keys')
   gpgArgs.push(fingerprint)
 
-
   const result: command.Result  = await command.exec('gpg', gpgArgs);
   if(!result.status) {
     return new Promise((resolve,reject) => {
@@ -67,7 +66,6 @@ export async function delete_public_key(fingerprint: string) : Promise<void> {
   gpgArgs.push('--delete-keys')
   gpgArgs.push(fingerprint)
 
-
   const result: command.Result  = await command.exec('gpg', gpgArgs);
   if(!result.status) {
     return new Promise((resolve,reject) => {
@@ -80,8 +78,15 @@ export async function delete_public_key(fingerprint: string) : Promise<void> {
   })
 }
 
-export async function delete_key(gpg_key: string) : Promise<any> {
-  let fingerprint: string = await get_fingerprint(gpg_key)
+export async function delete_key(fingerprint: string) : Promise<any> {
   await delete_secret_key(fingerprint)
   await delete_public_key(fingerprint)
+}
+
+export async function key_exists(fingerprint: string): Promise<boolean> {
+  let gpgArgs: Array<string> = [];
+  gpgArgs.push('--list-secret-keys', fingerprint)
+  const result: command.Result  = await command.exec('gpg', gpgArgs);
+
+  return result.status
 }

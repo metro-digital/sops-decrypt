@@ -6,6 +6,8 @@ import * as gpg from '../../src/gpg';
 jest.mock('../../src/gpg')
 
 let mockGPGDelete: jest.Mock
+let mockFingerprint: jest.Mock
+let mockKeyExists: jest.Mock
 
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
@@ -13,10 +15,14 @@ jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
 beforeEach(()=>{
   mockGPGDelete = mocked(gpg.delete_key, true)
+  mockFingerprint = mocked(gpg.get_fingerprint, true)
+  mockKeyExists = mocked(gpg.key_exists, true)
 })
 
 afterEach(()=>{
   mockGPGDelete.mockReset()
+  mockFingerprint.mockReset()
+  mockKeyExists.mockReset()
 })
 
 describe('When the post action is triggered', ()=>{
@@ -28,10 +34,28 @@ describe('When the post action is triggered', ()=>{
   afterEach(()=>{
     delete process.env['STATE_GPG_KEY'];
   })
+  describe('When gpg key is present', ()=>{
+    beforeEach(()=>{
+      mockKeyExists.mockResolvedValue(true)
+    })
 
-  it('should delete the gpg key imported', async()=>{
-    await action.run()
+    it('should delete the gpg key imported', async()=>{
+      mockFingerprint.mockResolvedValue('fpr')
+      await action.run()
 
-    expect(mockGPGDelete).toHaveBeenCalledWith(gpg_key)
+      expect(mockGPGDelete).toHaveBeenCalledWith('fpr')
+    })
+  })
+  describe('When gpg key is not present', ()=>{
+    beforeEach(()=>{
+      mockKeyExists.mockResolvedValue(false)
+    })
+
+    it('should not try to delete the gpg key', async()=>{
+      mockFingerprint.mockResolvedValue('fpr')
+      await action.run()
+
+      expect(mockGPGDelete).not.toHaveBeenCalled()
+    })
   })
 })
