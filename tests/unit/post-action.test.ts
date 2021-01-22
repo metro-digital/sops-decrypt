@@ -26,36 +26,74 @@ afterEach(()=>{
 })
 
 describe('When the post action is triggered', ()=>{
-  const gpg_key = 'key1'
-  beforeEach(()=>{
-    process.env['STATE_GPG_KEY'] = gpg_key;
-  })
-
-  afterEach(()=>{
-    delete process.env['STATE_GPG_KEY'];
-  })
-  describe('when gpg key is present', ()=>{
+  describe('when the state variable is set', ()=>{
     beforeEach(()=>{
-      mockKeyExists.mockResolvedValue(true)
+      process.env['STATE_GPG_KEY'] = 'key1';
     })
+    afterEach(()=>{
+      delete process.env['STATE_GPG_KEY'];
+    })
+    describe('when the runner gpg keyring has the gpg key', ()=>{
+      beforeEach(()=>{
+        mockKeyExists.mockResolvedValue(true)
+      })
 
-    it('should delete the gpg key imported', async()=>{
-      mockFingerprint.mockResolvedValue('fpr')
+      it('should delete the gpg key imported', async()=>{
+        mockFingerprint.mockResolvedValue('fpr')
+        await action.run()
+
+        expect(mockGPGDelete).toHaveBeenCalledWith('fpr')
+      })
+    })
+    describe('when the runner gpg keyring does not have the gpg key', ()=>{
+      beforeEach(()=>{
+        mockKeyExists.mockResolvedValue(false)
+      })
+
+      it('should not try to delete the gpg key', async()=>{
+        mockFingerprint.mockResolvedValue('fpr')
+        await action.run()
+
+        expect(mockGPGDelete).not.toHaveBeenCalled()
+      })
+    })
+    describe('if an error is occured', ()=>{
+      describe('while retrieving the fingerprint', ()=>{
+        beforeEach(()=>{
+          mockFingerprint.mockReturnValue(new Promise((resolve,reject) => {
+            reject(new Error(`Error message from fingerprint`))
+          }))
+        })
+
+        it('should return the error message', async ()=>{
+          let expectedErrorMsg = 'Error while deleting the gpg key: Error message from fingerprint'
+
+          await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        })
+      })
+
+      describe('while deleting the gpg key', ()=>{
+        beforeEach(()=>{
+          mockKeyExists.mockReturnValue(true)
+          mockGPGDelete.mockReturnValue(new Promise((resolve,reject) => {
+            reject(new Error(`Error message while deleting the gpg key`))
+          }))
+        })
+
+        it('should return the error message', async ()=>{
+          let expectedErrorMsg = 'Error while deleting the gpg key: Error message while deleting the gpg key'
+
+          await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        })
+      })
+    })
+  })
+
+  describe('when the state variable is not set', ()=>{
+    it('should not get the fingerprint', async ()=>{
       await action.run()
 
-      expect(mockGPGDelete).toHaveBeenCalledWith('fpr')
-    })
-  })
-  describe('when gpg key is not present', ()=>{
-    beforeEach(()=>{
-      mockKeyExists.mockResolvedValue(false)
-    })
-
-    it('should not try to delete the gpg key', async()=>{
-      mockFingerprint.mockResolvedValue('fpr')
-      await action.run()
-
-      expect(mockGPGDelete).not.toHaveBeenCalled()
+      expect(mockFingerprint).not.toHaveBeenCalled()
     })
   })
 })

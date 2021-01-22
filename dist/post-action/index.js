@@ -319,26 +319,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.key_exists = exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.get_fingerprint = exports.import_key = void 0;
+exports.key_exists = exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.fingerprint = exports.import_key = void 0;
 const command = __importStar(__webpack_require__(233));
+const core = __importStar(__webpack_require__(896));
 function import_key(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
         gpgArgs.push('--import');
+        core.info('Importing the gpg key');
         const result = yield command.exec('gpg', gpgArgs, gpg_key);
         if (!result.status) {
+            core.info('Failed importing the GPG key');
             return new Promise((resolve, reject) => {
                 reject(new Error(`Importing of GPG key failed: ${result.error}`));
             });
         }
+        core.info('Successfully imported the gpg key');
+        core.saveState('GPG_KEY', base64_gpg_key);
         return new Promise((resolve, reject) => {
             resolve();
         });
     });
 }
 exports.import_key = import_key;
-function get_fingerprint(base64_gpg_key) {
+function fingerprint(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
@@ -361,7 +366,7 @@ function get_fingerprint(base64_gpg_key) {
         });
     });
 }
-exports.get_fingerprint = get_fingerprint;
+exports.fingerprint = fingerprint;
 function delete_secret_key(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpgArgs = [];
@@ -1592,22 +1597,25 @@ const core = __importStar(__webpack_require__(896));
 const gpg = __importStar(__webpack_require__(410));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const gpg_key = process.env['STATE_GPG_KEY'] || '';
+        const gpg_key = core.getState('GPG_KEY');
         try {
-            core.info('Getting the fingerprint');
-            let fingerprint = yield gpg.get_fingerprint(gpg_key);
-            core.info('Got the fingerprint');
-            if (yield gpg.key_exists(fingerprint)) {
-                core.info('Deleting the imported gpg key');
-                yield gpg.delete_key(fingerprint);
-                core.info('Successfully deleted the imported gpg key');
-            }
-            else {
-                core.info('GPG key does not exist');
+            if (gpg_key) {
+                core.info('Getting the fingerprint');
+                let fingerprint = yield gpg.fingerprint(gpg_key);
+                core.info('Got the fingerprint');
+                if (yield gpg.key_exists(fingerprint)) {
+                    core.info('Deleting the imported gpg key');
+                    yield gpg.delete_key(fingerprint);
+                    core.info('Successfully deleted the imported gpg key');
+                }
+                else {
+                    core.info('GPG key does not exist');
+                }
             }
         }
         catch (e) {
             core.setFailed(`Error while deleting the gpg key ${e.message}`);
+            throw new Error(`Error while deleting the gpg key: ${e.message}`);
         }
     });
 }
