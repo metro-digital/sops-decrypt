@@ -116,7 +116,7 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the secret file: Error message from getOutputFormat'
+        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from getOutputFormat'
 
         await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
       })
@@ -130,7 +130,7 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the secret file: Error message from gpg'
+        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from gpg'
 
         await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
       })
@@ -144,7 +144,7 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the secret file: Error message from sops'
+        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from sops'
 
         await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
       })
