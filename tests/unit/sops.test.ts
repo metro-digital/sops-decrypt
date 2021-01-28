@@ -136,13 +136,13 @@ describe('When execution of sops command',()=>{
       expectedArgs.push('--output-type', 'json')
       expectedArgs.push(secretFile)
 
-      await sops.decrypt('sops', secretFile)
+      await sops.decrypt('sops', secretFile, 'json')
 
       expect(mockExec).toHaveBeenCalledWith('sops', expectedArgs)
     })
 
     it('should not throw an error', async ()=>{
-      await expect(sops.decrypt('sops', secretFile)).resolves.not.toThrow();
+      await expect(sops.decrypt('sops', secretFile, 'json')).resolves.not.toThrow();
     })
   })
 
@@ -156,12 +156,31 @@ describe('When execution of sops command',()=>{
     })
 
     it('should throw an error', async ()=>{
-      await expect(sops.decrypt('sops',secretFile)).rejects.toThrow();
+      await expect(sops.decrypt('sops',secretFile, '')).rejects.toThrow();
     })
 
     it('should throw the error returned by the command', async ()=>{
-      let expectedErrorMsg = 'Execution of sops command failed: Error message from SOPS'
-      await expect(sops.decrypt('sops',secretFile)).rejects.toThrowError(expectedErrorMsg);
+      let expectedErrorMsg = `Execution of sops command failed on ${secretFile}: Error message from SOPS`
+      await expect(sops.decrypt('sops',secretFile, '')).rejects.toThrowError(expectedErrorMsg);
+    })
+  })
+})
+
+describe('When getting the output format',()=>{
+  describe('if format is not specified', ()=>{
+    it('should return json as default', async ()=>{
+      let expected = 'json'
+
+      let actual = await sops.getOutputFormat('')
+
+      expect(actual).toStrictEqual(expected)
+    })
+  })
+  describe('If format is not supported by the action', ()=>{
+    it('should throw an error', async ()=>{
+      let output_type = 'file'
+      let expectedErrorMsg = `Output type "${output_type}" is not supporterd by sops-decrypt`
+      await expect(sops.getOutputFormat(output_type)).rejects.toThrowError(expectedErrorMsg)
     })
   })
 })

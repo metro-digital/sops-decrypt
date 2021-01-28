@@ -1,10 +1,9 @@
 import * as fs from 'fs'
 import { mocked } from 'ts-jest/utils';
 import * as core from '@actions/core';
-import * as action from '../../src/index';
+import * as action from '../../src/action';
 import * as gpg from '../../src/gpg';
 import * as sops from '../../src/sops';
-import * as command from '../../src/command';
 
 jest.mock('../../src/sops')
 jest.mock('../../src/gpg')
@@ -13,9 +12,10 @@ let mockGPGImport: jest.Mock
 let mockGPGDelete: jest.Mock
 let mockSOPSDecrypt: jest.Mock
 let mockSOPSInstall: jest.Mock
+let mockSOPSOutputFormat: jest.Mock
 
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
-jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
+let mockCoreSetFaild = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
@@ -24,6 +24,7 @@ beforeEach(()=>{
   mockGPGDelete = mocked(gpg.delete_key, true)
   mockSOPSDecrypt = mocked(sops.decrypt, true)
   mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
+  mockSOPSOutputFormat = mocked(sops.getOutputFormat, true)
 })
 
 afterEach(()=>{
@@ -31,6 +32,7 @@ afterEach(()=>{
   mockGPGDelete.mockReset()
   mockSOPSDecrypt.mockReset()
   mockSOPSInstall.mockReset()
+  mockSOPSOutputFormat.mockReset()
 })
 
 describe('When the action is triggered', ()=>{
@@ -41,14 +43,11 @@ describe('When the action is triggered', ()=>{
       process.env['INPUT_VERSION'] = 'goodVersion';
       process.env['INPUT_FILE'] = encrypted_file;
       process.env['INPUT_GPG_KEY'] = gpg_key;
+      process.env['INPUT_OUTPUT_TYPE'] = 'json';
       mockSOPSDecrypt.mockReturnValue(new Promise((resolve,reject) => {
-        resolve({
-          status: true,
-          output: JSON.stringify({
+        resolve(JSON.stringify({
             sample: "data"
-          }),
-          error: ''
-        } as command.Result)
+          }))
       }))
     })
 
@@ -56,6 +55,7 @@ describe('When the action is triggered', ()=>{
       delete process.env['INPUT_VERSION'];
       delete process.env['INPUT_FILE'];
       delete process.env['INPUT_GPG_KEY'];
+      delete process.env['INPUT_OUTPUT_TYPE'];
     })
 
     it('should install sops with version passed', async ()=>{
@@ -72,9 +72,10 @@ describe('When the action is triggered', ()=>{
 
     it('should decrypt the secret file passed', async ()=>{
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
+      mockSOPSOutputFormat.mockResolvedValue('json')
       await action.run()
 
-      expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file)
+      expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary',encrypted_file, 'json')
     })
   })
   describe('without passing a required key', ()=>{
@@ -88,12 +89,15 @@ describe('When the action is triggered', ()=>{
       delete process.env['INPUT_FILE'];
     })
     it('should throw an error', async ()=>{
-      let expectedErrorMsg = 'Input required and not supplied: gpg_key'
+      let expectedErrorMsg = 'Failed decrypting the file: Input required and not supplied: gpg_key'
 
-      await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+      await action.run()
+
+      await expect(mockCoreSetFaild).toHaveBeenCalledWith(expectedErrorMsg)
     })
   })
-  describe('an error is occured', ()=>{
+
+  describe('if an error is occured', ()=>{
     beforeEach(()=>{
       process.env['INPUT_VERSION'] = 'goodVersion';
       process.env['INPUT_FILE'] = encrypted_file;
@@ -106,7 +110,23 @@ describe('When the action is triggered', ()=>{
       delete process.env['INPUT_GPG_KEY'];
     })
 
-    describe('when importing a gpg key', ()=>{
+    describe('while getting the output format of sops', ()=>{
+      beforeEach(()=>{
+        mockSOPSOutputFormat.mockReturnValue(new Promise((resolve,reject) => {
+          reject(new Error(`Error message from getOutputFormat`))
+        }))
+      })
+
+      it('should return the error message', async ()=>{
+        let expectedErrorMsg = `Failed decrypting the file: Error message from getOutputFormat`
+
+        await action.run()
+
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
+      })
+    })
+
+    describe('while importing a gpg key', ()=>{
       beforeEach(()=>{
         mockGPGImport.mockReturnValue(new Promise((resolve,reject) => {
           reject(new Error(`Error message from gpg`))
@@ -114,13 +134,15 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the secret file: Error message from gpg'
+        let expectedErrorMsg = `Failed decrypting the file: Error message from gpg`
 
-        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        await action.run()
+
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
 
-    describe('when decrypting a secret file', ()=>{
+    describe('while decrypting a secret file', ()=>{
       beforeEach(()=>{
         mockSOPSDecrypt.mockReturnValue(new Promise((resolve,reject) => {
           reject(new Error(`Error message from sops`))
@@ -128,9 +150,11 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the secret file: Error message from sops'
+        let expectedErrorMsg = `Failed decrypting the file: Error message from sops`
 
-        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        await action.run()
+
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
   })

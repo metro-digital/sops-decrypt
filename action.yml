@@ -10,6 +10,9 @@ inputs:
   gpg_key:
     description: 'GPG key to decrypt the file'
     required: true
+  output_type:
+    description: 'Output format of the decrypted data'
+    default: 'json'
 outputs:
   data:
     description: 'Decrypted data in JSON'

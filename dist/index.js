@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(550);
+/******/ 		return __webpack_require__(695);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -1026,26 +1026,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.get_fingerprint = exports.import_key = void 0;
+exports.key_exists = exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.fingerprint = exports.import_key = void 0;
 const command = __importStar(__webpack_require__(233));
+const core = __importStar(__webpack_require__(896));
 function import_key(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
         gpgArgs.push('--import');
+        core.info('Importing the gpg key');
         const result = yield command.exec('gpg', gpgArgs, gpg_key);
         if (!result.status) {
+            core.info('Failed importing the GPG key');
             return new Promise((resolve, reject) => {
                 reject(new Error(`Importing of GPG key failed: ${result.error}`));
             });
         }
+        core.info('Successfully imported the gpg key');
+        core.saveState('GPG_KEY', base64_gpg_key);
         return new Promise((resolve, reject) => {
             resolve();
         });
     });
 }
 exports.import_key = import_key;
-function get_fingerprint(base64_gpg_key) {
+function fingerprint(base64_gpg_key) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
         let gpgArgs = [];
@@ -1068,7 +1073,7 @@ function get_fingerprint(base64_gpg_key) {
         });
     });
 }
-exports.get_fingerprint = get_fingerprint;
+exports.fingerprint = fingerprint;
 function delete_secret_key(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
         let gpgArgs = [];
@@ -1107,14 +1112,22 @@ function delete_public_key(fingerprint) {
     });
 }
 exports.delete_public_key = delete_public_key;
-function delete_key(gpg_key) {
+function delete_key(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        let fingerprint = yield get_fingerprint(gpg_key);
         yield delete_secret_key(fingerprint);
         yield delete_public_key(fingerprint);
     });
 }
 exports.delete_key = delete_key;
+function key_exists(fingerprint) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let gpgArgs = [];
+        gpgArgs.push('--list-secret-keys', fingerprint);
+        const result = yield command.exec('gpg', gpgArgs);
+        return result.status;
+    });
+}
+exports.key_exists = key_exists;
 
 
 /***/ }),
@@ -1144,78 +1157,6 @@ var crypto = __webpack_require__(417);
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
 };
-
-
-/***/ }),
-
-/***/ 550:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
-const core = __importStar(__webpack_require__(896));
-const fs = __importStar(__webpack_require__(747));
-const gpg = __importStar(__webpack_require__(410));
-const sops = __importStar(__webpack_require__(671));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const required = {
-            required: true
-        };
-        const version = core.getInput('version', required);
-        const gpg_key = core.getInput('gpg_key', required);
-        const encrypted_file = core.getInput('file', required);
-        try {
-            let sopsPath = yield sops.install(version, fs.chmodSync);
-            core.info('Importing the gpg key');
-            yield gpg.import_key(gpg_key);
-            core.saveState("GPG_KEY", gpg_key);
-            core.info('Imported the gpg key');
-            core.info('Decrypting the secrets');
-            let result = yield sops.decrypt(sopsPath, encrypted_file);
-            if (result.status) {
-                core.info('Successfully decrypted the secrets');
-                core.setOutput('data', JSON.parse(result.output));
-            }
-        }
-        catch (e) {
-            core.setFailed(`Error occured while executing the action ${e.message}`);
-            throw new Error(`Failed decrypting the secret file: ${e.message}`);
-        }
-    });
-}
-exports.run = run;
-run().catch((e) => { core.setFailed(e.message); });
 
 
 /***/ }),
@@ -2892,26 +2833,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.download = exports.downloadURL = exports.install = exports.decrypt = void 0;
+exports.getOutputFormat = exports.download = exports.downloadURL = exports.install = exports.decrypt = exports.OutputFormat = void 0;
 const core = __importStar(__webpack_require__(896));
 const toolCache = __importStar(__webpack_require__(913));
 const path = __importStar(__webpack_require__(622));
 const command = __importStar(__webpack_require__(233));
 const toolName = 'sops';
-function decrypt(sops, secret_file) {
+var OutputFormat;
+(function (OutputFormat) {
+    OutputFormat["JSON"] = "json";
+    OutputFormat["YAML"] = "yaml";
+    OutputFormat["DOTENV"] = "dotenv";
+})(OutputFormat = exports.OutputFormat || (exports.OutputFormat = {}));
+function decrypt(sops, secret_file, output_type) {
     return __awaiter(this, void 0, void 0, function* () {
         let sopsArgs = [];
         sopsArgs.push('--decrypt');
-        sopsArgs.push('--output-type', 'json');
+        sopsArgs.push('--output-type', output_type);
         sopsArgs.push(secret_file);
+        core.info(`Decrypting the secrets to ${output_type} format`);
         let result = yield command.exec(sops, sopsArgs);
         if (!result.status) {
+            core.info("Unable to decrypt the secrets");
             return new Promise((resolve, reject) => {
-                reject(new Error(`Execution of sops command failed: ${result.error}`));
+                reject(new Error(`Execution of sops command failed on ${secret_file}: ${result.error}`));
             });
         }
+        core.info("Sucessfully decrypted the secrets");
         return new Promise((resolve, reject) => {
-            resolve(result);
+            resolve(result.output);
         });
     });
 }
@@ -2952,6 +2902,54 @@ function download(version, extension, url) {
     });
 }
 exports.download = download;
+function getOutputFormat(output_type) {
+    if (Object.values(OutputFormat).includes(output_type)) {
+        return new Promise((resolve, reject) => {
+            resolve(output_type);
+        });
+    }
+    else if (!output_type) {
+        core.info(`No output_type selected, Defaulting to json`);
+        return new Promise((resolve, reject) => {
+            resolve(OutputFormat.JSON);
+        });
+    }
+    return new Promise((resolve, reject) => {
+        reject(new Error(`Output type "${output_type}" is not supporterd by sops-decrypt`));
+    });
+}
+exports.getOutputFormat = getOutputFormat;
+
+
+/***/ }),
+
+/***/ 695:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const action = __importStar(__webpack_require__(804));
+action.run();
 
 
 /***/ }),
@@ -3890,6 +3888,74 @@ function exec(commandLine, args, options) {
 }
 exports.exec = exec;
 //# sourceMappingURL=exec.js.map
+
+/***/ }),
+
+/***/ 804:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
+const core = __importStar(__webpack_require__(896));
+const fs = __importStar(__webpack_require__(747));
+const gpg = __importStar(__webpack_require__(410));
+const sops = __importStar(__webpack_require__(671));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const required = {
+                required: true
+            };
+            const version = core.getInput('version', required);
+            const gpg_key = core.getInput('gpg_key', required);
+            const encrypted_file = core.getInput('file', required);
+            const output_type = core.getInput('output_type');
+            let outputFormat = yield sops.getOutputFormat(output_type);
+            let sopsPath = yield sops.install(version, fs.chmodSync);
+            yield gpg.import_key(gpg_key);
+            let result = yield sops.decrypt(sopsPath, encrypted_file, outputFormat);
+            if (outputFormat === sops.OutputFormat.JSON) {
+                result = JSON.parse(result);
+            }
+            core.setOutput('data', result);
+        }
+        catch (error) {
+            core.setFailed(`Failed decrypting the file: ${error.message}`);
+        }
+    });
+}
+exports.run = run;
+
 
 /***/ }),
 

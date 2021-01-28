@@ -5,20 +5,29 @@ import * as command from './command'
 
 const toolName = 'sops'
 
-export async function decrypt(sops: string, secret_file: string) : Promise<command.Result> {
+export enum OutputFormat {
+  JSON = 'json',
+  YAML = 'yaml',
+  DOTENV = 'dotenv'
+}
+
+export async function decrypt(sops: string, secret_file: string, output_type: string) : Promise<string> {
   let sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
-  sopsArgs.push('--output-type', 'json')
+  sopsArgs.push('--output-type', output_type)
   sopsArgs.push(secret_file)
+  core.info(`Decrypting the secrets to ${output_type} format`)
   let result: command.Result = await command.exec(sops, sopsArgs)
   if(!result.status) {
+    core.info("Unable to decrypt the secrets")
     return new Promise((resolve,reject) => {
-      reject(new Error(`Execution of sops command failed: ${result.error}`))
+      reject(new Error(`Execution of sops command failed on ${secret_file}: ${result.error}`))
     })
   }
 
+  core.info("Sucessfully decrypted the secrets")
   return new Promise((resolve,reject) => {
-    resolve(result)
+    resolve(result.output)
   })
 }
 
@@ -64,4 +73,21 @@ export async function download(version: string, extension:string, url: string) {
   );
 
   return executablePath
+}
+
+export function getOutputFormat(output_type: string): Promise<string> {
+  if(Object.values(OutputFormat).includes(output_type as OutputFormat)){
+    return new Promise((resolve,reject) => {
+      resolve(output_type)
+    })
+  } else if (!output_type) {
+    core.info(`No output_type selected, Defaulting to json`)
+    return new Promise((resolve,reject) => {
+      resolve(OutputFormat.JSON)
+    })
+  }
+
+  return new Promise((resolve,reject) => {
+    reject(new Error(`Output type "${output_type}" is not supporterd by sops-decrypt`))
+  })
 }

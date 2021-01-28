@@ -18,11 +18,17 @@ A GitHub action that can be used to decrypt a SOPS encrypted file.
 
 **Required** Base64 encoded private GPG key that can decrypt the file
 
+### `output_type`
+
+**Default: json**
+
+Format to which the decrypted secrets should be converted. Formats supported are `json`, `yaml`, `dotenv`.
+
 ## Outputs
 
 ### `data`
 
-Decrypted data in JSON format
+Decrypted data in selected format
 
 ## Example usage
 
@@ -36,4 +42,5 @@ jobs:
           version: '3.6.1'
           file: 'ci/secrets/file1.yaml'
           gpg_key: '<private_gpg_key_base64_encoded>'
+          output_type: 'json'
 ```
