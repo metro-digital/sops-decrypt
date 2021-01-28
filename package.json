@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "build": "ncc build src/index.ts && ncc build src/post-action.ts -o dist/post-action",
+    "build": "ncc build src/main.ts && ncc build src/post-action.ts -o dist/post-action",
     "unitTests": "jest tests/unit/*.test.ts",
     "integrationTests": "jest tests/integration/index.test.ts",
     "journeyTests": "jest tests/journey/index.test.ts",

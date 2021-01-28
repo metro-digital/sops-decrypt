@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as io from '@actions/io'
 import * as core from '@actions/core'
-import * as action from '../../src/index';
+import * as action from '../../src/action';
 import * as gpg_keys from '../fixtures/gpg_private_keys'
 
 jest.spyOn(core, 'debug').mockImplementation(jest.fn())

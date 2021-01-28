@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { mocked } from 'ts-jest/utils';
 import * as core from '@actions/core';
-import * as action from '../../src/index';
+import * as action from '../../src/action';
 import * as gpg from '../../src/gpg';
 import * as sops from '../../src/sops';
 
@@ -15,7 +15,7 @@ let mockSOPSInstall: jest.Mock
 let mockSOPSOutputFormat: jest.Mock
 
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
-jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
+let mockCoreSetFaild = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
@@ -118,7 +118,9 @@ describe('When the action is triggered', ()=>{
       it('should return the error message', async ()=>{
         let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from getOutputFormat'
 
-        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        await action.run()
+
+        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
 
@@ -132,7 +134,9 @@ describe('When the action is triggered', ()=>{
       it('should return the error message', async ()=>{
         let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from gpg'
 
-        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        await action.run()
+
+        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
 
@@ -146,7 +150,9 @@ describe('When the action is triggered', ()=>{
       it('should return the error message', async ()=>{
         let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from sops'
 
-        await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+        await action.run()
+
+        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
   })

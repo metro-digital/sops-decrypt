@@ -24,8 +24,6 @@ export async function run() {
     core.setOutput('data', result)
   }
   catch(e) {
-    throw new Error(`Failed decrypting the file "${encrypted_file}": ${e.message}`)
+    core.setFailed(`Failed decrypting the file "${encrypted_file}": ${e.message}`)
   }
 }
-
-run().catch((e) => {core.setFailed(e.message)});
