@@ -89,9 +89,11 @@ describe('When the action is triggered', ()=>{
       delete process.env['INPUT_FILE'];
     })
     it('should throw an error', async ()=>{
-      let expectedErrorMsg = 'Input required and not supplied: gpg_key'
+      let expectedErrorMsg = 'Failed decrypting the file: Input required and not supplied: gpg_key'
 
-      await expect(action.run()).rejects.toThrowError(expectedErrorMsg);
+      await action.run()
+
+      await expect(mockCoreSetFaild).toHaveBeenCalledWith(expectedErrorMsg)
     })
   })
 
@@ -116,11 +118,11 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from getOutputFormat'
+        let expectedErrorMsg = `Failed decrypting the file: Error message from getOutputFormat`
 
         await action.run()
 
-        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
 
@@ -132,11 +134,11 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from gpg'
+        let expectedErrorMsg = `Failed decrypting the file: Error message from gpg`
 
         await action.run()
 
-        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
 
@@ -148,11 +150,11 @@ describe('When the action is triggered', ()=>{
       })
 
       it('should return the error message', async ()=>{
-        let expectedErrorMsg = 'Failed decrypting the file "encrypted/file1": Error message from sops'
+        let expectedErrorMsg = `Failed decrypting the file: Error message from sops`
 
         await action.run()
 
-        await expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
+        expect(mockCoreSetFaild).toBeCalledWith(expectedErrorMsg);
       })
     })
   })

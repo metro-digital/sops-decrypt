@@ -2856,7 +2856,7 @@ function decrypt(sops, secret_file, output_type) {
         if (!result.status) {
             core.info("Unable to decrypt the secrets");
             return new Promise((resolve, reject) => {
-                reject(new Error(`Execution of sops command failed: ${result.error}`));
+                reject(new Error(`Execution of sops command failed on ${secret_file}: ${result.error}`));
             });
         }
         core.info("Sucessfully decrypted the secrets");
@@ -3932,14 +3932,14 @@ const gpg = __importStar(__webpack_require__(410));
 const sops = __importStar(__webpack_require__(671));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const required = {
-            required: true
-        };
-        const version = core.getInput('version', required);
-        const gpg_key = core.getInput('gpg_key', required);
-        const encrypted_file = core.getInput('file', required);
-        const output_type = core.getInput('output_type');
         try {
+            const required = {
+                required: true
+            };
+            const version = core.getInput('version', required);
+            const gpg_key = core.getInput('gpg_key', required);
+            const encrypted_file = core.getInput('file', required);
+            const output_type = core.getInput('output_type');
             let outputFormat = yield sops.getOutputFormat(output_type);
             let sopsPath = yield sops.install(version, fs.chmodSync);
             yield gpg.import_key(gpg_key);
@@ -3949,8 +3949,8 @@ function run() {
             }
             core.setOutput('data', result);
         }
-        catch (e) {
-            core.setFailed(`Failed decrypting the file "${encrypted_file}": ${e.message}`);
+        catch (error) {
+            core.setFailed(`Failed decrypting the file: ${error.message}`);
         }
     });
 }

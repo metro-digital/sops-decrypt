@@ -21,7 +21,7 @@ export async function decrypt(sops: string, secret_file: string, output_type: st
   if(!result.status) {
     core.info("Unable to decrypt the secrets")
     return new Promise((resolve,reject) => {
-      reject(new Error(`Execution of sops command failed: ${result.error}`))
+      reject(new Error(`Execution of sops command failed on ${secret_file}: ${result.error}`))
     })
   }
 

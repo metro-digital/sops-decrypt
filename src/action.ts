@@ -5,14 +5,14 @@ import * as gpg from './gpg'
 import * as sops from './sops'
 
 export async function run() {
-  const required: InputOptions = {
-    required: true
-  }
-  const version: string = core.getInput('version', required)
-  const gpg_key: string = core.getInput('gpg_key', required)
-  const encrypted_file: string = core.getInput('file', required)
-  const output_type: string = core.getInput('output_type')
   try {
+    const required: InputOptions = {
+      required: true
+    }
+    const version: string = core.getInput('version', required)
+    const gpg_key: string = core.getInput('gpg_key', required)
+    const encrypted_file: string = core.getInput('file', required)
+    const output_type: string = core.getInput('output_type')
     let outputFormat = await sops.getOutputFormat(output_type)
     let sopsPath = await sops.install(version, fs.chmodSync)
     await gpg.import_key(gpg_key)
@@ -23,7 +23,7 @@ export async function run() {
 
     core.setOutput('data', result)
   }
-  catch(e) {
-    core.setFailed(`Failed decrypting the file "${encrypted_file}": ${e.message}`)
+  catch(error) {
+    core.setFailed(`Failed decrypting the file: ${error.message}`)
   }
 }

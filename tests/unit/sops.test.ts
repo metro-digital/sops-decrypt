@@ -160,7 +160,7 @@ describe('When execution of sops command',()=>{
     })
 
     it('should throw the error returned by the command', async ()=>{
-      let expectedErrorMsg = 'Execution of sops command failed: Error message from SOPS'
+      let expectedErrorMsg = `Execution of sops command failed on ${secretFile}: Error message from SOPS`
       await expect(sops.decrypt('sops',secretFile, '')).rejects.toThrowError(expectedErrorMsg);
     })
   })
