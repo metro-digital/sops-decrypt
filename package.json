@@ -6,8 +6,8 @@
   "scripts": {
     "build": "ncc build src/main.ts && ncc build src/post-action.ts -o dist/post-action",
     "unitTests": "jest tests/unit/*.test.ts",
-    "integrationTests": "jest tests/integration/index.test.ts",
-    "journeyTests": "jest tests/journey/index.test.ts",
+    "integrationTests": "jest tests/integration/*.test.ts",
+    "journeyTests": "jest tests/journey/*.test.ts",
     "test": "jest",
     "testCoverage": "jest --coverage",
     "format": "prettier --write **/*.ts"
