@@ -1,6 +1,6 @@
 # SOPS Decrypt action
 
-![test suite](https://github.com/metro-digital-inner-source/sops-decrypt/workflows/Tests/badge.svg)
+![test suite](https://github.com/metro-digital/sops-decrypt/workflows/Tests/badge.svg)
 
 A GitHub action that can be used to decrypt a SOPS encrypted file.
 
@@ -37,7 +37,7 @@ jobs:
   decrypt-secrets:
     runs-on: ubuntu
     steps:
-      - uses: metro-digital-inner-source/sops-decrypt
+      - uses: metro-digital/sops-decrypt
         with:
           version: '3.6.1'
           file: 'ci/secrets/file1.yaml'
