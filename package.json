@@ -14,15 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/metro-digital-inner-source/sops-decrypt.git"
+    "url": "git+https://github.com/metro-digital/sops-decrypt.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "METRO.digital",
+  "license": "Apache License Version 2.0",
   "bugs": {
-    "url": "https://github.com/metro-digital-inner-source/sops-decrypt/issues"
+    "url": "https://github.com/metro-digital/sops-decrypt/issues"
   },
-  "homepage": "https://github.com/metro-digital-inner-source/sops-decrypt#readme",
+  "homepage": "https://github.com/metro-digital/sops-decrypt#readme",
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.7",
