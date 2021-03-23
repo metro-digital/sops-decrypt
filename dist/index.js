@@ -9132,7 +9132,10 @@ function run() {
             const sopsPath = yield sops.install(version, fs.chmodSync);
             yield gpg.importKey(gpgKey);
             let result = yield sops.decrypt(sopsPath, encryptedFile, outputFormat);
-            result = hideSecrets(result, outputFormat);
+            hideSecrets(result, outputFormat);
+            if (outputFormat === sops.OutputFormat.JSON) {
+                result = JSON.parse(result);
+            }
             core.setOutput('data', result);
         }
         catch (error) {
@@ -9149,13 +9152,12 @@ function hideSecrets(result, outputFormat) {
     else if (outputFormat === sops.OutputFormat.YAML) {
         obj = yaml.load(result);
     }
-    if (outputFormat === sops.OutputFormat.DOTENV) {
+    else if (outputFormat === sops.OutputFormat.DOTENV) {
         obj = envfile.parse(result);
     }
     for (const property in obj) {
         core.setSecret(obj[property]);
     }
-    return obj;
 }
 
 
