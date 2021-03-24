@@ -34,6 +34,7 @@ jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 const mockCoreSetFailed = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
+const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
 
 beforeEach(() => {
   mockGPGImport = mocked(gpg.importKey, true)
@@ -92,8 +93,10 @@ describe('When the action is triggered', () => {
       await action.run()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary', encryptedFile, 'json')
+      expect(mockCoreSetSecret).toHaveBeenCalledTimes(1)
     })
   })
+
   describe('without passing a required key', () => {
     beforeEach(() => {
       process.env.INPUT_VERSION = 'goodVersion'
@@ -104,6 +107,7 @@ describe('When the action is triggered', () => {
       delete process.env.INPUT_VERSION
       delete process.env.INPUT_FILE
     })
+
     it('should throw an error', async () => {
       const expectedErrorMsg = 'Failed decrypting the file: Input required and not supplied: gpg_key'
 

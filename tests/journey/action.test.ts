@@ -28,6 +28,7 @@ jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 const mockSetOutput = jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
+const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools')
@@ -68,6 +69,8 @@ describe('When the action is triggered with output not set', () => {
     }
 
     expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
   })
 })
 
@@ -92,6 +95,8 @@ describe('When the action is triggered with output set to dotenv', () => {
     const expectedData = 'Planet=earth\nHello=world'
 
     expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
   })
 })
 
@@ -116,5 +121,7 @@ describe('When the action is triggered with output set to yaml', () => {
     const expectedData = 'Planet: earth\nHello: world'
 
     expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
+    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
   })
 })
