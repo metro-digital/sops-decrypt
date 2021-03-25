@@ -1612,9 +1612,9 @@ function exec(command, args, stdin) {
                 error += data.toString();
             }
         };
-        const returncode = yield actionsExec.exec(command, args, options);
-        let result = {
-            status: returncode === 0,
+        const returnCode = yield actionsExec.exec(command, args, options);
+        const result = {
+            status: returnCode === 0,
             output: output.trim(),
             error: error.trim()
         };
@@ -1674,16 +1674,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.key_exists = exports.delete_key = exports.delete_public_key = exports.delete_secret_key = exports.fingerprint = exports.import_key = void 0;
+exports.keyExists = exports.deleteKey = exports.deletePublicKey = exports.deleteSecretKey = exports.fingerprint = exports.importKey = void 0;
 const command = __importStar(__webpack_require__(909));
 const core = __importStar(__webpack_require__(398));
-function import_key(base64_gpg_key) {
+function importKey(base64GPGKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
-        let gpgArgs = [];
+        const gpgKey = Buffer.from(base64GPGKey, 'base64').toString();
+        const gpgArgs = [];
         gpgArgs.push('--import');
         core.info('Importing the gpg key');
-        const result = yield command.exec('gpg', gpgArgs, gpg_key);
+        const result = yield command.exec('gpg', gpgArgs, gpgKey);
         if (!result.status) {
             core.info('Failed importing the GPG key');
             return new Promise((resolve, reject) => {
@@ -1691,40 +1691,40 @@ function import_key(base64_gpg_key) {
             });
         }
         core.info('Successfully imported the gpg key');
-        core.saveState('GPG_KEY', base64_gpg_key);
-        return new Promise((resolve, reject) => {
+        core.saveState('GPG_KEY', base64GPGKey);
+        return new Promise((resolve) => {
             resolve();
         });
     });
 }
-exports.import_key = import_key;
-function fingerprint(base64_gpg_key) {
+exports.importKey = importKey;
+function fingerprint(base64GPGKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpg_key = Buffer.from(base64_gpg_key, 'base64').toString();
-        let gpgArgs = [];
+        const gpgKey = Buffer.from(base64GPGKey, 'base64').toString();
+        const gpgArgs = [];
         gpgArgs.push('--with-colons');
         gpgArgs.push('--import-options', 'show-only');
         gpgArgs.push('--import');
         gpgArgs.push('--fingerprint');
-        const gpgResult = yield command.exec('gpg', gpgArgs, gpg_key);
+        const gpgResult = yield command.exec('gpg', gpgArgs, gpgKey);
         if (!gpgResult.status) {
             return new Promise((resolve, reject) => {
                 reject(new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`));
             });
         }
-        let fingerprints = gpgResult.output;
-        let matchingString = "fpr";
-        let fingerprint = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split("\n")[0];
+        const fingerprints = gpgResult.output;
+        const matchingString = 'fpr';
+        let fingerprint = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split('\n')[0];
         fingerprint = fingerprint.replace(/[^a-zA-Z0-9]/g, '');
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve(fingerprint);
         });
     });
 }
 exports.fingerprint = fingerprint;
-function delete_secret_key(fingerprint) {
+function deleteSecretKey(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpgArgs = [];
+        const gpgArgs = [];
         gpgArgs.push('--batch');
         gpgArgs.push('--yes');
         gpgArgs.push('--delete-secret-keys');
@@ -1735,15 +1735,15 @@ function delete_secret_key(fingerprint) {
                 reject(new Error(`Deleting private GPG key failed: ${result.error}`));
             });
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve();
         });
     });
 }
-exports.delete_secret_key = delete_secret_key;
-function delete_public_key(fingerprint) {
+exports.deleteSecretKey = deleteSecretKey;
+function deletePublicKey(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpgArgs = [];
+        const gpgArgs = [];
         gpgArgs.push('--batch');
         gpgArgs.push('--yes');
         gpgArgs.push('--delete-keys');
@@ -1754,28 +1754,28 @@ function delete_public_key(fingerprint) {
                 reject(new Error(`Deleting gpg public key failed: ${result.error}`));
             });
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve();
         });
     });
 }
-exports.delete_public_key = delete_public_key;
-function delete_key(fingerprint) {
+exports.deletePublicKey = deletePublicKey;
+function deleteKey(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield delete_secret_key(fingerprint);
-        yield delete_public_key(fingerprint);
+        yield deleteSecretKey(fingerprint);
+        yield deletePublicKey(fingerprint);
     });
 }
-exports.delete_key = delete_key;
-function key_exists(fingerprint) {
+exports.deleteKey = deleteKey;
+function keyExists(fingerprint) {
     return __awaiter(this, void 0, void 0, function* () {
-        let gpgArgs = [];
+        const gpgArgs = [];
         gpgArgs.push('--list-secret-keys', fingerprint);
         const result = yield command.exec('gpg', gpgArgs);
         return result.status;
     });
 }
-exports.key_exists = key_exists;
+exports.keyExists = keyExists;
 
 
 /***/ }),
@@ -1833,15 +1833,15 @@ const core = __importStar(__webpack_require__(398));
 const gpg = __importStar(__webpack_require__(164));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const gpg_key = core.getState('GPG_KEY');
+        const gpgKey = core.getState('GPG_KEY');
         try {
-            if (gpg_key) {
+            if (gpgKey) {
                 core.info('Getting the fingerprint');
-                let fingerprint = yield gpg.fingerprint(gpg_key);
+                const fingerprint = yield gpg.fingerprint(gpgKey);
                 core.info('Got the fingerprint');
-                if (yield gpg.key_exists(fingerprint)) {
+                if (yield gpg.keyExists(fingerprint)) {
                     core.info('Deleting the imported gpg key');
-                    yield gpg.delete_key(fingerprint);
+                    yield gpg.deleteKey(fingerprint);
                     core.info('Successfully deleted the imported gpg key');
                 }
                 else {

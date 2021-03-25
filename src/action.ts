@@ -19,27 +19,46 @@ import { InputOptions } from '@actions/core'
 import * as fs from 'fs'
 import * as gpg from './gpg'
 import * as sops from './sops'
+import * as envfile from 'envfile'
+import * as yaml from 'js-yaml'
 
-export async function run() {
+export async function run () {
   try {
     const required: InputOptions = {
       required: true
     }
     const version: string = core.getInput('version', required)
-    const gpg_key: string = core.getInput('gpg_key', required)
-    const encrypted_file: string = core.getInput('file', required)
-    const output_type: string = core.getInput('output_type')
-    let outputFormat = await sops.getOutputFormat(output_type)
-    let sopsPath = await sops.install(version, fs.chmodSync)
-    await gpg.import_key(gpg_key)
-    let result: string = await sops.decrypt(sopsPath, encrypted_file, outputFormat)
+    const gpgKey: string = core.getInput('gpg_key', required)
+    const encryptedFile: string = core.getInput('file', required)
+    const outputType: string = core.getInput('output_type')
+    const outputFormat = await sops.getOutputFormat(outputType)
+    const sopsPath = await sops.install(version, fs.chmodSync)
+    await gpg.importKey(gpgKey)
+    let result: string = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
+
+    hideSecrets(result, outputFormat)
     if (outputFormat === sops.OutputFormat.JSON) {
       result = JSON.parse(result)
     }
 
     core.setOutput('data', result)
-  }
-  catch(error) {
+  } catch (error) {
     core.setFailed(`Failed decrypting the file: ${error.message}`)
+  }
+}
+
+function hideSecrets (result: string, outputFormat: string) :void {
+  let obj: any
+
+  if (outputFormat === sops.OutputFormat.JSON) {
+    obj = JSON.parse(result)
+  } else if (outputFormat === sops.OutputFormat.YAML) {
+    obj = yaml.load(result)
+  } else if (outputFormat === sops.OutputFormat.DOTENV) {
+    obj = envfile.parse(result)
+  }
+
+  for (const property in obj) {
+    core.setSecret(obj[property])
   }
 }
