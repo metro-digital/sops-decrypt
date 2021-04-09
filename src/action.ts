@@ -59,6 +59,14 @@ function hideSecrets (result: string, outputFormat: string) :void {
   }
 
   for (const property in obj) {
-    core.setSecret(obj[property])
+    const val = '' + obj[property]
+    if (val.indexOf('\n') === -1) {
+      core.setSecret(val)
+    } else {
+      // setSecret does not support multiline strings
+      for (const line of val.split('\n')) {
+        core.setSecret(line)
+      }
+    }
   }
 }
