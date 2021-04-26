@@ -32,7 +32,29 @@ export async function importKey (base64GPGKey: string) : Promise<void> {
   }
 
   core.info('Successfully imported the gpg key')
+  core.info(result.output)
   core.saveState('GPG_KEY', base64GPGKey)
+  return new Promise((resolve) => {
+    resolve()
+  })
+}
+
+export async function listKeys () : Promise<void> {
+  const gpgArgs: Array<string> = []
+  gpgArgs.push('--list-keys')
+
+  core.info('Listing the keys')
+  const result: command.Result = await command.exec('gpg', gpgArgs)
+  if (!result.status) {
+    core.info('Failed to list the keys')
+    return new Promise((resolve, reject) => {
+      reject(new Error(`Failed to list the keys: ${result.error}`))
+    })
+  }
+
+  core.info('Successfully listed the keys')
+  core.info(`Env variable GNUPGHOME: ${process.env.GNUPGHOME}`)
+  core.info(`Keys\n${result.output}`)
   return new Promise((resolve) => {
     resolve()
   })

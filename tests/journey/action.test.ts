@@ -35,6 +35,7 @@ const toolsDir = path.join(runnerDir, 'tools')
 const toolsTempDir = path.join(runnerDir, 'temp')
 
 beforeAll(async () => {
+  process.env.RUNNER_WORKSPACE = path.join(runnerDir)
   process.env.RUNNER_TOOL_CACHE = toolsDir
   process.env.RUNNER_TEMP = toolsTempDir
   process.env.INPUT_VERSION = '3.6.1'
@@ -55,6 +56,12 @@ describe('When the action is triggered with output not set', () => {
   beforeAll(async () => {
     await action.run()
   }, 100000)
+
+  it('should set GNUPGHOME env variable with runner workspace', async () => {
+    const dir = path.join(runnerDir)
+
+    expect(process.env.GNUPGHOME).toBe(dir)
+  })
 
   it('should download the given version of SOPS package', async () => {
     const dir = path.join(toolsDir, 'sops', '3.6.1', os.arch())
@@ -85,6 +92,12 @@ describe('When the action is triggered with output set to dotenv', () => {
     delete process.env.INPUT_OUTPUT_TYPE
   })
 
+  it('should set GNUPGHOME env variable with runner workspace', async () => {
+    const dir = path.join(runnerDir)
+
+    expect(process.env.GNUPGHOME).toBe(dir)
+  })
+
   it('should download the given version of SOPS package', async () => {
     const dir = path.join(toolsDir, 'sops', '3.6.1', os.arch())
 
@@ -109,6 +122,12 @@ describe('When the action is triggered with output set to yaml', () => {
 
   afterAll(async () => {
     delete process.env.INPUT_OUTPUT_TYPE
+  })
+
+  it('should set GNUPGHOME env variable with runner workspace', async () => {
+    const dir = path.join(runnerDir)
+
+    expect(process.env.GNUPGHOME).toBe(dir)
   })
 
   it('should download the given version of SOPS package', async () => {
