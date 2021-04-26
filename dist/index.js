@@ -3195,7 +3195,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.keyExists = exports.deleteKey = exports.deletePublicKey = exports.deleteSecretKey = exports.fingerprint = exports.listKeys = exports.importKey = void 0;
+exports.keyExists = exports.deleteKey = exports.deletePublicKey = exports.deleteSecretKey = exports.fingerprint = exports.importKey = void 0;
 const command = __importStar(__webpack_require__(233));
 const core = __importStar(__webpack_require__(896));
 function importKey(base64GPGKey) {
@@ -3212,7 +3212,6 @@ function importKey(base64GPGKey) {
             });
         }
         core.info('Successfully imported the gpg key');
-        core.info(result.output);
         core.saveState('GPG_KEY', base64GPGKey);
         return new Promise((resolve) => {
             resolve();
@@ -3220,27 +3219,6 @@ function importKey(base64GPGKey) {
     });
 }
 exports.importKey = importKey;
-function listKeys() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const gpgArgs = [];
-        gpgArgs.push('--list-keys');
-        core.info('Listing the keys');
-        const result = yield command.exec('gpg', gpgArgs);
-        if (!result.status) {
-            core.info('Failed to list the keys');
-            return new Promise((resolve, reject) => {
-                reject(new Error(`Failed to list the keys: ${result.error}`));
-            });
-        }
-        core.info('Successfully listed the keys');
-        core.info(`Env variable GNUPGHOME: ${process.env.GNUPGHOME}`);
-        core.info(`Keys\n${result.output}`);
-        return new Promise((resolve) => {
-            resolve();
-        });
-    });
-}
-exports.listKeys = listKeys;
 function fingerprint(base64GPGKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const gpgKey = Buffer.from(base64GPGKey, 'base64').toString();
@@ -7711,6 +7689,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             process.env.GNUPGHOME = process.env.RUNNER_WORKSPACE;
+            core.exportVariable('GNUPGHOME', process.env.GNUPGHOME);
             const required = {
                 required: true
             };
@@ -7721,7 +7700,6 @@ function run() {
             const outputFormat = yield sops.getOutputFormat(outputType);
             const sopsPath = yield sops.install(version, fs.chmodSync);
             yield gpg.importKey(gpgKey);
-            yield gpg.listKeys();
             let result = yield sops.decrypt(sopsPath, encryptedFile, outputFormat);
             hideSecrets(result, outputFormat);
             if (outputFormat === sops.OutputFormat.JSON) {

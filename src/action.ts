@@ -25,6 +25,7 @@ import * as yaml from 'js-yaml'
 export async function run () {
   try {
     process.env.GNUPGHOME = process.env.RUNNER_WORKSPACE
+    core.exportVariable('GNUPGHOME', process.env.GNUPGHOME)
     const required: InputOptions = {
       required: true
     }
@@ -35,7 +36,6 @@ export async function run () {
     const outputFormat = await sops.getOutputFormat(outputType)
     const sopsPath = await sops.install(version, fs.chmodSync)
     await gpg.importKey(gpgKey)
-    await gpg.listKeys()
     let result: string = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
 
     hideSecrets(result, outputFormat)

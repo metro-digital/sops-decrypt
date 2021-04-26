@@ -27,6 +27,7 @@ jest.spyOn(core, 'addPath').mockImplementation(jest.fn())
 jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
+jest.spyOn(core, 'exportVariable').mockImplementation(jest.fn())
 const mockSetOutput = jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
 
