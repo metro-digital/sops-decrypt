@@ -1,0 +1,5 @@
+This project is based on open source software for which an additional notice is required.
+
+The dependency spdx-exceptions.json by Kyle Mitchell is controlled by the package manager NPM and is licensed under CC-BY-3.0 (https://creativecommons.org/licenses/by/3.0/legalcode). Its source code can be obtained here: https://github.com/jslicense/spdx-exceptions.json
+
+The dependency caniuse-lite from caniuse.com is controlled by the package manager NPM and is licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/legalcode). Its source code can be obtained here: https://github.com/browserslist/caniuse-lite
