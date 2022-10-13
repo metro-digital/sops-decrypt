@@ -8,7 +8,7 @@
     "unitTests": "jest tests/unit/*.test.ts",
     "integrationTests": "jest tests/integration/*.test.ts",
     "journeyTests": "jest tests/journey/*.test.ts",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint **/*.ts",
     "test": "jest",
     "testCoverage": "jest --coverage"
   },
