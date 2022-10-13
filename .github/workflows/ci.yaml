@@ -33,3 +33,20 @@ jobs:
     - name: Execute tests
       run: |
         npm run test
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      run: |
+        npm run ci
+    - name: Build action
+      run: |
+        npm run build
+        . .env-ci
+        node ./dist/index.js
+        node ./dist/post-action/index.js

@@ -3,3 +3,5 @@ lib
 coverage
 .scannerwork
 .vscode/settings.json
+cache
+temp
