@@ -27,27 +27,25 @@ export enum OutputFormat {
   DOTENV = 'dotenv'
 }
 
-export async function decrypt (sops: string, secretFile: string, outputType: string) : Promise<string> {
+export const OutputFormats = ['json', 'yaml', 'dotenv']
+
+export async function decrypt (sops: string, secretFile: string, outputType: string) {
   const sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
   sopsArgs.push('--output-type', outputType)
   sopsArgs.push(secretFile)
   core.info(`Decrypting the secrets to ${outputType} format`)
-  const result: command.Result = await command.exec(sops, sopsArgs)
+  const result = await command.exec(sops, sopsArgs)
   if (!result.status) {
     core.info('Unable to decrypt the secrets')
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`))
-    })
+    throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`)
   }
 
   core.info('Successfully decrypted the secrets')
-  return new Promise((resolve) => {
-    resolve(result.output)
-  })
+  return result.output
 }
 
-export async function install (version: string, chmod: (path: string, mode: string) => void): Promise<string> {
+export async function install (version: string, chmod: (path: string, mode: string) => void) {
   const extension = process.platform === 'win32' ? '.exe' : ''
   const url = downloadURL(version)
   const binaryPath = await download(version, extension, url)
@@ -56,13 +54,13 @@ export async function install (version: string, chmod: (path: string, mode: stri
   return binaryPath
 }
 
-export function downloadURL (version: string): string {
+export function downloadURL (version: string) {
   const extension = process.platform === 'win32' ? 'exe' : process.platform
 
   return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`
 }
 
-export async function download (version: string, extension:string, url: string): Promise<string> {
+export async function download (version: string, extension:string, url: string) {
   let cachedToolpath = toolCache.find(toolName, version)
   if (!cachedToolpath) {
     core.debug(`Downloading ${toolName} from: ${url}`)
@@ -91,19 +89,17 @@ export async function download (version: string, extension:string, url: string):
   return executablePath
 }
 
-export function getOutputFormat (outputType: string): Promise<OutputFormat> {
-  if (Object.values(OutputFormat).includes(outputType as OutputFormat)) {
-    return new Promise((resolve) => {
-      resolve(outputType as OutputFormat)
-    })
+function isOutputFormat (outputFormat: string): outputFormat is OutputFormat {
+  return OutputFormats.includes(outputFormat)
+}
+
+export function getOutputFormat (outputType: string): OutputFormat {
+  if (isOutputFormat(outputType)) {
+    return outputType
   } else if (!outputType) {
     core.info('No output_type selected, Defaulting to json')
-    return new Promise((resolve) => {
-      resolve(OutputFormat.JSON)
-    })
+    return OutputFormat.JSON
   }
 
-  return new Promise((resolve, reject) => {
-    reject(new Error(`Output type "${outputType}" is not supported by sops-decrypt`))
-  })
+  throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`)
 }

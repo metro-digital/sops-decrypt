@@ -89,7 +89,7 @@ describe('When the action is triggered', () => {
 
     it('should decrypt the secret file passed', async () => {
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
-      mockSOPSOutputFormat.mockResolvedValue(sops.OutputFormat.JSON)
+      mockSOPSOutputFormat.mockReturnValue(sops.OutputFormat.JSON)
       await action.run()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary', encryptedFile, 'json')
@@ -132,9 +132,7 @@ describe('When the action is triggered', () => {
 
     describe('while getting the output format of sops', () => {
       beforeEach(() => {
-        mockSOPSOutputFormat.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from getOutputFormat'))
-        }))
+        mockSOPSOutputFormat.mockImplementation(() => { throw new Error('Error message from getOutputFormat') })
       })
 
       it('should return the error message', async () => {

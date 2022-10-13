@@ -22,19 +22,19 @@ import * as sops from './sops'
 import * as envfile from 'envfile'
 import * as yaml from 'js-yaml'
 
-export async function run (): Promise<void> {
+export async function run () {
   try {
     const required: InputOptions = {
       required: true
     }
-    const version: string = core.getInput('version', required)
-    const gpgKey: string = core.getInput('gpg_key', required)
-    const encryptedFile: string = core.getInput('file', required)
-    const outputType: string = core.getInput('output_type')
-    const outputFormat = await sops.getOutputFormat(outputType)
+    const version = core.getInput('version', required)
+    const gpgKey = core.getInput('gpg_key', required)
+    const encryptedFile = core.getInput('file', required)
+    const outputType = core.getInput('output_type')
+    const outputFormat = sops.getOutputFormat(outputType)
     const sopsPath = await sops.install(version, fs.chmodSync)
     await gpg.importKey(gpgKey)
-    let result: string = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
+    let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
 
     hideSecrets(result, outputFormat)
     if (outputFormat === sops.OutputFormat.JSON) {

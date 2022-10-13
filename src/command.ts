@@ -22,9 +22,9 @@ export interface Result {
   error: string
 }
 
-export async function exec (command: string, args: string[], stdin?: string): Promise<Result> {
-  let output = ''
-  let error = ''
+export async function exec (command: string, args: string[], stdin?: string) {
+  let output = Buffer.from([])
+  let error = Buffer.from([])
   const options: ExecOptions = {
     silent: true,
     ignoreReturnCode: true,
@@ -32,17 +32,17 @@ export async function exec (command: string, args: string[], stdin?: string): Pr
   }
   options.listeners = {
     stdout: (data: Buffer) => {
-      output += data.toString()
+      output = Buffer.concat([output, data])
     },
     stderr: (data: Buffer) => {
-      error += data.toString()
+      error = Buffer.concat([error, data])
     }
   }
   const returnCode = await actionsExec.exec(command, args, options)
-  const result = {
+  const result: Result = {
     status: returnCode === 0,
-    output: output.trim(),
-    error: error.trim()
+    output: output.toString().trim(),
+    error: error.toString().trim()
   }
 
   return result

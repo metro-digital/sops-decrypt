@@ -17,7 +17,7 @@
 import * as core from '@actions/core'
 import * as gpg from './gpg'
 
-export async function run (): Promise<void> {
+export async function run () {
   const gpgKey = core.getState('GPG_KEY')
   try {
     if (gpgKey) {

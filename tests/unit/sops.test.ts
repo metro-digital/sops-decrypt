@@ -196,7 +196,7 @@ describe('When getting the output format', () => {
     it('should throw an error', async () => {
       const outputType = 'file'
       const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`
-      await expect(sops.getOutputFormat(outputType)).rejects.toThrowError(expectedErrorMsg)
+      expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg)
     })
   })
 })
