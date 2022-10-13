@@ -3310,9 +3310,9 @@ function fingerprint(base64GPGKey) {
       throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
     }
     const fingerprints = gpgResult.output;
-    let fingerprint2 = fingerprints.slice(fingerprints.indexOf("fpr") + 3).split("\n")[0];
-    fingerprint2 = fingerprint2.replace(/[^a-zA-Z0-9]/g, "");
-    return fingerprint2;
+    const startIndex = fingerprints.indexOf("fpr") + 3;
+    const endIndex = fingerprints.indexOf("\n", startIndex);
+    return fingerprints.slice(startIndex, endIndex).replace(/[^a-zA-Z0-9]/g, "");
   });
 }
 function deleteSecretKey(fingerprint2) {
