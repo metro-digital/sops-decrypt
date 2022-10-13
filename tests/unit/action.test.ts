@@ -15,7 +15,7 @@
  */
 
 import * as fs from 'fs'
-import { mocked } from 'ts-jest/utils'
+import { mocked } from 'jest-mock'
 import * as core from '@actions/core'
 import * as action from '../../src/action'
 import * as gpg from '../../src/gpg'
@@ -24,11 +24,11 @@ import * as sops from '../../src/sops'
 jest.mock('../../src/sops')
 jest.mock('../../src/gpg')
 
-let mockGPGImport: jest.Mock
-let mockGPGDelete: jest.Mock
-let mockSOPSDecrypt: jest.Mock
-let mockSOPSInstall: jest.Mock
-let mockSOPSOutputFormat: jest.Mock
+let mockGPGImport: jest.MockedFunction<typeof gpg.importKey>
+let mockGPGDelete: jest.MockedFunction<typeof gpg.deleteKey>
+let mockSOPSDecrypt: jest.MockedFunction<typeof sops.decrypt>
+let mockSOPSInstall: jest.MockedFunction<typeof sops.install>
+let mockSOPSOutputFormat: jest.MockedFunction<typeof sops.getOutputFormat>
 
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 const mockCoreSetFailed = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
@@ -37,11 +37,11 @@ jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
 
 beforeEach(() => {
-  mockGPGImport = mocked(gpg.importKey, true)
-  mockGPGDelete = mocked(gpg.deleteKey, true)
-  mockSOPSDecrypt = mocked(sops.decrypt, true)
-  mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
-  mockSOPSOutputFormat = mocked(sops.getOutputFormat, true)
+  mockGPGImport = mocked(gpg.importKey)
+  mockGPGDelete = mocked(gpg.deleteKey)
+  mockSOPSDecrypt = mocked(sops.decrypt)
+  mockSOPSInstall = mocked(sops.install).mockResolvedValue('sops')
+  mockSOPSOutputFormat = mocked(sops.getOutputFormat)
 })
 
 afterEach(() => {

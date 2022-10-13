@@ -17,7 +17,7 @@
 import * as gpg from '../../src/gpg'
 import * as core from '@actions/core'
 import * as command from '../../src/command'
-import { mocked } from 'ts-jest/utils'
+import { mocked } from 'jest-mock'
 
 jest.mock('../../src/command')
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
@@ -25,10 +25,10 @@ jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
 jest.spyOn(core, 'info').mockImplementation(jest.fn())
 jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 
-let mockExec: jest.Mock
+let mockExec: jest.MockedFunction<typeof command.exec>
 
 beforeEach(() => {
-  mockExec = mocked(command.exec, true)
+  mockExec = mocked(command.exec)
 })
 
 afterEach(() => {
@@ -38,11 +38,11 @@ afterEach(() => {
 describe('When importing of a gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockReturnValue(Promise.resolve({
         status: true,
         output: 'imported',
         error: 'Unable to import the gpg key'
-      } as command.Result)
+      }))
     })
 
     it('should pass the right arguments', async () => {
@@ -61,11 +61,11 @@ describe('When importing of a gpg key', () => {
 
   describe('is a failure', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockReturnValue(Promise.resolve({
         status: false,
         output: 'imported',
         error: 'Error message from gpg'
-      } as command.Result)
+      }))
     })
 
     it('should throw an error', async () => {
@@ -82,11 +82,11 @@ describe('When importing of a gpg key', () => {
 describe('When getting fingerprint of a gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockReturnValue(Promise.resolve({
         status: true,
         output: 'sample_fpr',
         error: ''
-      } as command.Result)
+      }))
     })
 
     it('should pass the right arguments', async () => {
@@ -110,11 +110,11 @@ describe('When getting fingerprint of a gpg key', () => {
 describe('When deleting the secret gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockReturnValue(Promise.resolve({
         status: true,
         output: '',
         error: ''
-      } as command.Result)
+      }))
     })
 
     it('should pass the right arguments', async () => {
@@ -138,11 +138,11 @@ describe('When deleting the secret gpg key', () => {
 describe('When deleting the public gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockReturnValue(Promise.resolve({
         status: true,
         output: '',
         error: ''
-      } as command.Result)
+      }))
     })
 
     it('should pass the right arguments', async () => {
