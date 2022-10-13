@@ -38,11 +38,11 @@ afterEach(() => {
 describe('When importing of a gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: true,
         output: 'imported',
         error: 'Unable to import the gpg key'
-      }))
+      })
     })
 
     it('should pass the right arguments', async () => {
@@ -61,11 +61,11 @@ describe('When importing of a gpg key', () => {
 
   describe('is a failure', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: false,
         output: 'imported',
         error: 'Error message from gpg'
-      }))
+      })
     })
 
     it('should throw an error', async () => {
@@ -82,11 +82,11 @@ describe('When importing of a gpg key', () => {
 describe('When getting fingerprint of a gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: true,
         output: 'sample_fpr',
         error: ''
-      }))
+      })
     })
 
     it('should pass the right arguments', async () => {
@@ -110,11 +110,11 @@ describe('When getting fingerprint of a gpg key', () => {
 describe('When deleting the secret gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: true,
         output: '',
         error: ''
-      }))
+      })
     })
 
     it('should pass the right arguments', async () => {
@@ -138,11 +138,11 @@ describe('When deleting the secret gpg key', () => {
 describe('When deleting the public gpg key', () => {
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: true,
         output: '',
         error: ''
-      }))
+      })
     })
 
     it('should pass the right arguments', async () => {

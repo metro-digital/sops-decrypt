@@ -76,9 +76,7 @@ describe('When the post action is triggered', () => {
     describe('if an error is occurred', () => {
       describe('while retrieving the fingerprint', () => {
         beforeEach(() => {
-          mockFingerprint.mockReturnValue(new Promise((resolve, reject) => {
-            reject(new Error('Error message from fingerprint'))
-          }))
+          mockFingerprint.mockRejectedValue(new Error('Error message from fingerprint'))
         })
 
         it('should return the error message', async () => {
@@ -90,10 +88,8 @@ describe('When the post action is triggered', () => {
 
       describe('while deleting the gpg key', () => {
         beforeEach(() => {
-          mockKeyExists.mockReturnValue(Promise.resolve(true))
-          mockGPGDelete.mockReturnValue(new Promise((resolve, reject) => {
-            reject(new Error('Error message while deleting the gpg key'))
-          }))
+          mockKeyExists.mockResolvedValue(true)
+          mockGPGDelete.mockRejectedValue(new Error('Error message while deleting the gpg key'))
         })
 
         it('should return the error message', async () => {

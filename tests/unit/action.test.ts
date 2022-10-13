@@ -61,11 +61,7 @@ describe('When the action is triggered', () => {
       process.env.INPUT_FILE = encryptedFile
       process.env.INPUT_GPG_KEY = gpgKey
       process.env.INPUT_OUTPUT_TYPE = 'json'
-      mockSOPSDecrypt.mockReturnValue(new Promise((resolve) => {
-        resolve(JSON.stringify({
-          sample: 'data'
-        }))
-      }))
+      mockSOPSDecrypt.mockResolvedValue(JSON.stringify({ sample: 'data' }))
     })
 
     afterEach(() => {
@@ -146,9 +142,7 @@ describe('When the action is triggered', () => {
 
     describe('while importing a gpg key', () => {
       beforeEach(() => {
-        mockGPGImport.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from gpg'))
-        }))
+        mockGPGImport.mockRejectedValue(new Error('Error message from gpg'))
       })
 
       it('should return the error message', async () => {
@@ -162,9 +156,7 @@ describe('When the action is triggered', () => {
 
     describe('while decrypting a secret file', () => {
       beforeEach(() => {
-        mockSOPSDecrypt.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from sops'))
-        }))
+        mockSOPSDecrypt.mockRejectedValue(new Error('Error message from sops'))
       })
 
       it('should return the error message', async () => {

@@ -139,11 +139,11 @@ describe('When execution of sops command', () => {
   const secretFile = 'folder1/encrypted_file.yaml'
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: true,
         output: 'decrypted',
         error: ''
-      }))
+      })
     })
 
     it('should pass the right arguments', async () => {
@@ -164,11 +164,11 @@ describe('When execution of sops command', () => {
 
   describe('is a failure', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue(Promise.resolve({
+      mockExec.mockResolvedValue({
         status: false,
         output: '',
         error: 'Error message from SOPS'
-      }))
+      })
     })
 
     it('should throw an error', async () => {
@@ -184,16 +184,16 @@ describe('When execution of sops command', () => {
 
 describe('When getting the output format', () => {
   describe('if format is not specified', () => {
-    it('should return json as default', async () => {
+    it('should return json as default', () => {
       const expected = 'json'
 
-      const actual = await sops.getOutputFormat('')
+      const actual = sops.getOutputFormat('')
 
       expect(actual).toStrictEqual(expected)
     })
   })
   describe('If format is not supported by the action', () => {
-    it('should throw an error', async () => {
+    it('should throw an error', () => {
       const outputType = 'file'
       const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`
       expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg)
