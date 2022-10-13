@@ -5305,7 +5305,12 @@ var core2 = __toESM(require_core());
 var toolCache = __toESM(require_tool_cache());
 var path = __toESM(require("path"));
 var toolName = "sops";
-var OutputFormats = ["json", "yaml", "dotenv"];
+var OutputFormat = /* @__PURE__ */ ((OutputFormat2) => {
+  OutputFormat2["JSON"] = "json";
+  OutputFormat2["YAML"] = "yaml";
+  OutputFormat2["DOTENV"] = "dotenv";
+  return OutputFormat2;
+})(OutputFormat || {});
 function decrypt(sops, secretFile, outputType) {
   return __async(this, null, function* () {
     const sopsArgs = [];
@@ -5362,8 +5367,8 @@ function download(version, extension, url) {
     return executablePath;
   });
 }
-function isOutputFormat(outputFormat) {
-  return OutputFormats.includes(outputFormat);
+function isOutputFormat(value) {
+  return Object.values(OutputFormat).includes(value);
 }
 function getOutputFormat(outputType) {
   if (isOutputFormat(outputType)) {

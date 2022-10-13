@@ -27,8 +27,6 @@ export enum OutputFormat {
   DOTENV = 'dotenv'
 }
 
-export const OutputFormats = ['json', 'yaml', 'dotenv']
-
 export async function decrypt (sops: string, secretFile: string, outputType: string) {
   const sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
@@ -89,8 +87,8 @@ export async function download (version: string, extension:string, url: string) 
   return executablePath
 }
 
-function isOutputFormat (outputFormat: string): outputFormat is OutputFormat {
-  return OutputFormats.includes(outputFormat)
+function isOutputFormat (value: string): value is OutputFormat {
+  return Object.values(OutputFormat).includes(value as OutputFormat)
 }
 
 export function getOutputFormat (outputType: string): OutputFormat {
