@@ -9,6 +9,8 @@ on:
         required: true
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
