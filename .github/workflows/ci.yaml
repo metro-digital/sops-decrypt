@@ -43,9 +43,9 @@ jobs:
         node-version: '16'
     - name: Build action
       run: |
-        npm install
-        npm run build
-        rm -rf ./node_modules
+        npm install &&
+        npm run build &&
+        rm -rf ./node_modules &&
         npm install --production
     - name: Test Action
       run: |
