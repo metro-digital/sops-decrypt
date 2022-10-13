@@ -22,7 +22,7 @@ import * as sops from './sops'
 import * as envfile from 'envfile'
 import * as yaml from 'js-yaml'
 
-export async function run () {
+export async function run (): Promise<void> {
   try {
     const required: InputOptions = {
       required: true
@@ -42,20 +42,24 @@ export async function run () {
     }
 
     core.setOutput('data', result)
-  } catch (error) {
-    core.setFailed(`Failed decrypting the file: ${error.message}`)
+  } catch (error: unknown) {
+    core.setFailed(`Failed decrypting the file: ${(error as Error).message}`)
   }
 }
 
-function hideSecrets (result: string, outputFormat: string) :void {
-  let obj: any
+function hideSecrets (result: string, outputFormat: sops.OutputFormat) :void {
+  let obj: { [key: string]: string }
 
-  if (outputFormat === sops.OutputFormat.JSON) {
-    obj = JSON.parse(result)
-  } else if (outputFormat === sops.OutputFormat.YAML) {
-    obj = yaml.load(result)
-  } else if (outputFormat === sops.OutputFormat.DOTENV) {
-    obj = envfile.parse(result)
+  switch (outputFormat) {
+    case sops.OutputFormat.JSON:
+      obj = JSON.parse(result)
+      break
+    case sops.OutputFormat.YAML:
+      obj = yaml.load(result) as { [key: string]: string }
+      break
+    case sops.OutputFormat.DOTENV:
+      obj = envfile.parse(result)
+      break
   }
 
   for (const property in obj) {

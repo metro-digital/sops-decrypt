@@ -22,9 +22,9 @@ export interface Result {
   error: string
 }
 
-export async function exec (command: string, args: string[], stdin?: string) {
-  let output: string = ''
-  let error: string = ''
+export async function exec (command: string, args: string[], stdin?: string): Promise<Result> {
+  let output = ''
+  let error = ''
   const options: ExecOptions = {
     silent: true,
     ignoreReturnCode: true,
@@ -43,7 +43,7 @@ export async function exec (command: string, args: string[], stdin?: string) {
     status: returnCode === 0,
     output: output.trim(),
     error: error.trim()
-  } as Result
+  }
 
   return result
 }

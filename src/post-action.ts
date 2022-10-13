@@ -17,7 +17,7 @@
 import * as core from '@actions/core'
 import * as gpg from './gpg'
 
-export async function run () {
+export async function run (): Promise<void> {
   const gpgKey = core.getState('GPG_KEY')
   try {
     if (gpgKey) {
@@ -32,9 +32,9 @@ export async function run () {
         core.info('GPG key does not exist')
       }
     }
-  } catch (e) {
-    core.setFailed(`Error while deleting the gpg key ${e.message}`)
-    throw new Error(`Error while deleting the gpg key: ${e.message}`)
+  } catch (e: unknown) {
+    core.setFailed(`Error while deleting the gpg key ${(e as Error).message}`)
+    throw new Error(`Error while deleting the gpg key: ${(e as Error).message}`)
   }
 }
 

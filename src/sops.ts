@@ -47,7 +47,7 @@ export async function decrypt (sops: string, secretFile: string, outputType: str
   })
 }
 
-export async function install (version: string, chmod: Function) {
+export async function install (version: string, chmod: (path: string, mode: string) => void): Promise<string> {
   const extension = process.platform === 'win32' ? '.exe' : ''
   const url = downloadURL(version)
   const binaryPath = await download(version, extension, url)
@@ -56,13 +56,13 @@ export async function install (version: string, chmod: Function) {
   return binaryPath
 }
 
-export function downloadURL (version: string) {
+export function downloadURL (version: string): string {
   const extension = process.platform === 'win32' ? 'exe' : process.platform
 
   return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`
 }
 
-export async function download (version: string, extension:string, url: string) {
+export async function download (version: string, extension:string, url: string): Promise<string> {
   let cachedToolpath = toolCache.find(toolName, version)
   if (!cachedToolpath) {
     core.debug(`Downloading ${toolName} from: ${url}`)
@@ -70,8 +70,8 @@ export async function download (version: string, extension:string, url: string) 
     let downloadedToolPath: string
     try {
       downloadedToolPath = await toolCache.downloadTool(url)
-    } catch (error) {
-      core.debug(error)
+    } catch (error: unknown) {
+      core.debug((error as Error).message)
       throw new Error(`Failed to download version ${version}: ${error}`)
     }
 
@@ -91,10 +91,10 @@ export async function download (version: string, extension:string, url: string) 
   return executablePath
 }
 
-export function getOutputFormat (outputType: string): Promise<string> {
+export function getOutputFormat (outputType: string): Promise<OutputFormat> {
   if (Object.values(OutputFormat).includes(outputType as OutputFormat)) {
     return new Promise((resolve) => {
-      resolve(outputType)
+      resolve(outputType as OutputFormat)
     })
   } else if (!outputType) {
     core.info('No output_type selected, Defaulting to json')

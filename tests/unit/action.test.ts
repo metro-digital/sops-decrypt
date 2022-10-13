@@ -89,7 +89,7 @@ describe('When the action is triggered', () => {
 
     it('should decrypt the secret file passed', async () => {
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
-      mockSOPSOutputFormat.mockResolvedValue('json')
+      mockSOPSOutputFormat.mockResolvedValue(sops.OutputFormat.JSON)
       await action.run()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary', encryptedFile, 'json')

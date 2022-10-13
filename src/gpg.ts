@@ -99,7 +99,7 @@ export async function deletePublicKey (fingerprint: string) : Promise<void> {
   })
 }
 
-export async function deleteKey (fingerprint: string) : Promise<any> {
+export async function deleteKey (fingerprint: string) : Promise<void> {
   await deleteSecretKey(fingerprint)
   await deletePublicKey(fingerprint)
 }
