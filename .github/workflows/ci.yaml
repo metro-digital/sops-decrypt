@@ -49,6 +49,5 @@ jobs:
         npm install --production
     - name: Test Action
       run: |
-        . .env-ci
-        node ./dist/index.js
-        node ./dist/post-action/index.js
+        npm run test:build:ci
+

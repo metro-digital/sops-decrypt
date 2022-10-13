@@ -8,9 +8,11 @@
     "git:add:dist": "git add dist",
     "lint": "eslint **/*.ts",
     "test": "jest --coverage",
-    "test:unit": "jest tests/unit/*.test.ts",
+    "test:build:ci": ". ./.env-ci && npm run build && node ./dist/index.js && node ./dist/post-action/index.js",
+    "test:build:local": ". ./.env-local && npm run build && node ./dist/index.js && node ./dist/post-action/index.js",
     "test:integration": "jest tests/integration/*.test.ts",
-    "test:journey": "jest tests/journey/*.test.ts"
+    "test:journey": "jest tests/journey/*.test.ts",
+    "test:unit": "jest tests/unit/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -53,6 +55,8 @@
   "pre-commit": [
     "lint",
     "test",
-    "build"
+    "build",
+    "test:build:local",
+    "git:add:dist"
   ]
 }
