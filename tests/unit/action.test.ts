@@ -15,7 +15,7 @@
  */
 
 import * as fs from 'fs'
-import { mocked } from 'ts-jest/utils'
+import { mocked } from 'jest-mock'
 import * as core from '@actions/core'
 import * as action from '../../src/action'
 import * as gpg from '../../src/gpg'
@@ -24,11 +24,11 @@ import * as sops from '../../src/sops'
 jest.mock('../../src/sops')
 jest.mock('../../src/gpg')
 
-let mockGPGImport: jest.Mock
-let mockGPGDelete: jest.Mock
-let mockSOPSDecrypt: jest.Mock
-let mockSOPSInstall: jest.Mock
-let mockSOPSOutputFormat: jest.Mock
+let mockGPGImport: jest.MockedFunction<typeof gpg.importKey>
+let mockGPGDelete: jest.MockedFunction<typeof gpg.deleteKey>
+let mockSOPSDecrypt: jest.MockedFunction<typeof sops.decrypt>
+let mockSOPSInstall: jest.MockedFunction<typeof sops.install>
+let mockSOPSOutputFormat: jest.MockedFunction<typeof sops.getOutputFormat>
 
 jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
 const mockCoreSetFailed = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
@@ -37,11 +37,11 @@ jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
 const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
 
 beforeEach(() => {
-  mockGPGImport = mocked(gpg.importKey, true)
-  mockGPGDelete = mocked(gpg.deleteKey, true)
-  mockSOPSDecrypt = mocked(sops.decrypt, true)
-  mockSOPSInstall = mocked(sops.install, true).mockResolvedValue('sops')
-  mockSOPSOutputFormat = mocked(sops.getOutputFormat, true)
+  mockGPGImport = mocked(gpg.importKey)
+  mockGPGDelete = mocked(gpg.deleteKey)
+  mockSOPSDecrypt = mocked(sops.decrypt)
+  mockSOPSInstall = mocked(sops.install).mockResolvedValue('sops')
+  mockSOPSOutputFormat = mocked(sops.getOutputFormat)
 })
 
 afterEach(() => {
@@ -61,11 +61,7 @@ describe('When the action is triggered', () => {
       process.env.INPUT_FILE = encryptedFile
       process.env.INPUT_GPG_KEY = gpgKey
       process.env.INPUT_OUTPUT_TYPE = 'json'
-      mockSOPSDecrypt.mockReturnValue(new Promise((resolve) => {
-        resolve(JSON.stringify({
-          sample: 'data'
-        }))
-      }))
+      mockSOPSDecrypt.mockResolvedValue(JSON.stringify({ sample: 'data' }))
     })
 
     afterEach(() => {
@@ -89,7 +85,7 @@ describe('When the action is triggered', () => {
 
     it('should decrypt the secret file passed', async () => {
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
-      mockSOPSOutputFormat.mockResolvedValue('json')
+      mockSOPSOutputFormat.mockReturnValue(sops.OutputFormat.JSON)
       await action.run()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary', encryptedFile, 'json')
@@ -132,9 +128,7 @@ describe('When the action is triggered', () => {
 
     describe('while getting the output format of sops', () => {
       beforeEach(() => {
-        mockSOPSOutputFormat.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from getOutputFormat'))
-        }))
+        mockSOPSOutputFormat.mockImplementation(() => { throw new Error('Error message from getOutputFormat') })
       })
 
       it('should return the error message', async () => {
@@ -148,9 +142,7 @@ describe('When the action is triggered', () => {
 
     describe('while importing a gpg key', () => {
       beforeEach(() => {
-        mockGPGImport.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from gpg'))
-        }))
+        mockGPGImport.mockRejectedValue(new Error('Error message from gpg'))
       })
 
       it('should return the error message', async () => {
@@ -164,9 +156,7 @@ describe('When the action is triggered', () => {
 
     describe('while decrypting a secret file', () => {
       beforeEach(() => {
-        mockSOPSDecrypt.mockReturnValue(new Promise((resolve, reject) => {
-          reject(new Error('Error message from sops'))
-        }))
+        mockSOPSDecrypt.mockRejectedValue(new Error('Error message from sops'))
       })
 
       it('should return the error message', async () => {

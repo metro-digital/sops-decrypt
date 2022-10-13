@@ -27,14 +27,14 @@ export async function run () {
     const required: InputOptions = {
       required: true
     }
-    const version: string = core.getInput('version', required)
-    const gpgKey: string = core.getInput('gpg_key', required)
-    const encryptedFile: string = core.getInput('file', required)
-    const outputType: string = core.getInput('output_type')
-    const outputFormat = await sops.getOutputFormat(outputType)
+    const version = core.getInput('version', required)
+    const gpgKey = core.getInput('gpg_key', required)
+    const encryptedFile = core.getInput('file', required)
+    const outputType = core.getInput('output_type')
+    const outputFormat = sops.getOutputFormat(outputType)
     const sopsPath = await sops.install(version, fs.chmodSync)
     await gpg.importKey(gpgKey)
-    let result: string = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
+    let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
 
     hideSecrets(result, outputFormat)
     if (outputFormat === sops.OutputFormat.JSON) {
@@ -42,20 +42,24 @@ export async function run () {
     }
 
     core.setOutput('data', result)
-  } catch (error) {
-    core.setFailed(`Failed decrypting the file: ${error.message}`)
+  } catch (error: unknown) {
+    core.setFailed(`Failed decrypting the file: ${(error as Error).message}`)
   }
 }
 
-function hideSecrets (result: string, outputFormat: string) :void {
-  let obj: any
+function hideSecrets (result: string, outputFormat: sops.OutputFormat) :void {
+  let obj: { [key: string]: string }
 
-  if (outputFormat === sops.OutputFormat.JSON) {
-    obj = JSON.parse(result)
-  } else if (outputFormat === sops.OutputFormat.YAML) {
-    obj = yaml.load(result)
-  } else if (outputFormat === sops.OutputFormat.DOTENV) {
-    obj = envfile.parse(result)
+  switch (outputFormat) {
+    case sops.OutputFormat.JSON:
+      obj = JSON.parse(result)
+      break
+    case sops.OutputFormat.YAML:
+      obj = yaml.load(result) as { [key: string]: string }
+      break
+    case sops.OutputFormat.DOTENV:
+      obj = envfile.parse(result)
+      break
   }
 
   for (const property in obj) {

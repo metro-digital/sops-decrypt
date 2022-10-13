@@ -17,97 +17,98 @@
 import * as command from './command'
 import * as core from '@actions/core'
 
-export async function importKey (base64GPGKey: string) : Promise<void> {
-  const gpgKey: string = Buffer.from(base64GPGKey, 'base64').toString()
-  const gpgArgs: Array<string> = []
-  gpgArgs.push('--import')
+export async function importKey (base64GPGKey: string) {
+  const gpgKey = Buffer.from(base64GPGKey, 'base64').toString()
+  const gpgArgs = [
+    '--import'
+  ]
 
   core.info('Importing the gpg key')
-  const result: command.Result = await command.exec('gpg', gpgArgs, gpgKey)
+  const result = await command.exec('gpg', gpgArgs, gpgKey)
   if (!result.status) {
     core.info('Failed importing the GPG key')
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Importing of GPG key failed: ${result.error}`))
-    })
+    throw new Error(`Importing of GPG key failed: ${result.error}`)
   }
 
   core.info('Successfully imported the gpg key')
   core.saveState('GPG_KEY', base64GPGKey)
-  return new Promise((resolve) => {
-    resolve()
-  })
 }
 
-export async function fingerprint (base64GPGKey: string) : Promise<string> {
-  const gpgKey: string = Buffer.from(base64GPGKey, 'base64').toString()
-  const gpgArgs: Array<string> = []
-  gpgArgs.push('--with-colons')
-  gpgArgs.push('--import-options', 'show-only')
-  gpgArgs.push('--import')
-  gpgArgs.push('--fingerprint')
-  const gpgResult: command.Result = await command.exec('gpg', gpgArgs, gpgKey)
+export async function fingerprint (base64GPGKey: string) {
+  const gpgKey = Buffer.from(base64GPGKey, 'base64').toString()
+  const gpgArgs = [
+    '--with-colons',
+    '--import-options',
+    'show-only',
+    '--import',
+    '--fingerprint'
+  ]
+
+  const gpgResult = await command.exec('gpg', gpgArgs, gpgKey)
   if (!gpgResult.status) {
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`))
-    })
+    throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`)
   }
+
+  /**
+   * Output of above gpg call is as follows:
+   *
+   * sec:-:2048:1:A344AC03500C6401:1594233019:::-:::escaESCA::::::23::0:
+   * fpr:::::::::B4226A1192494789A9402116A344AC03500C6401:
+   * grp:::::::::B202A8890617B36D91BB0BBB6AE81C90B91D855E:
+   * uid:-::::1594233019::1936E9CF3341B6EA8C41249F913982ECD506EE96::root <root@some-fake-domain.org>::::::::::0:
+   * ssb:-:2048:1:56FEEEE45BC6F34A:1594233019::::::esa::::::23:
+   * fpr:::::::::60FD47A6A6D745043B57AE3556FEEEE45BC6F34A:
+   * grp:::::::::34E2DF99E3BDA0E8DE6FC9FE521CD1EC8B719E1C:
+   */
 
   const fingerprints = gpgResult.output
-  const matchingString = 'fpr'
-  let fingerprint: string = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split('\n')[0]
-  fingerprint = fingerprint.replace(/[^a-zA-Z0-9]/g, '')
-  return new Promise((resolve) => {
-    resolve(fingerprint)
-  })
+  const startIndex = fingerprints.indexOf('fpr') + 3
+  const endIndex = fingerprints.indexOf('\n', startIndex)
+
+  return fingerprints
+    .slice(startIndex, endIndex)
+    .replace(/[^a-zA-Z0-9]/g, '')
 }
 
-export async function deleteSecretKey (fingerprint: string) : Promise<void> {
-  const gpgArgs: Array<string> = []
-  gpgArgs.push('--batch')
-  gpgArgs.push('--yes')
-  gpgArgs.push('--delete-secret-keys')
-  gpgArgs.push(fingerprint)
+export async function deleteSecretKey (fingerprint: string) {
+  const gpgArgs = [
+    '--batch',
+    '--yes',
+    '--delete-secret-keys',
+    fingerprint
+  ]
 
-  const result: command.Result = await command.exec('gpg', gpgArgs)
+  const result = await command.exec('gpg', gpgArgs)
   if (!result.status) {
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Deleting private GPG key failed: ${result.error}`))
-    })
+    throw new Error(`Deleting private GPG key failed: ${result.error}`)
   }
-
-  return new Promise((resolve) => {
-    resolve()
-  })
 }
 
-export async function deletePublicKey (fingerprint: string) : Promise<void> {
-  const gpgArgs: Array<string> = []
-  gpgArgs.push('--batch')
-  gpgArgs.push('--yes')
-  gpgArgs.push('--delete-keys')
-  gpgArgs.push(fingerprint)
+export async function deletePublicKey (fingerprint: string) {
+  const gpgArgs = [
+    '--batch',
+    '--yes',
+    '--delete-keys',
+    fingerprint
+  ]
 
-  const result: command.Result = await command.exec('gpg', gpgArgs)
+  const result = await command.exec('gpg', gpgArgs)
   if (!result.status) {
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Deleting gpg public key failed: ${result.error}`))
-    })
+    throw new Error(`Deleting gpg public key failed: ${result.error}`)
   }
-
-  return new Promise((resolve) => {
-    resolve()
-  })
 }
 
-export async function deleteKey (fingerprint: string) : Promise<any> {
+export async function deleteKey (fingerprint: string) {
   await deleteSecretKey(fingerprint)
   await deletePublicKey(fingerprint)
 }
 
-export async function keyExists (fingerprint: string): Promise<boolean> {
-  const gpgArgs: Array<string> = []
-  gpgArgs.push('--list-secret-keys', fingerprint)
-  const result: command.Result = await command.exec('gpg', gpgArgs)
+export async function keyExists (fingerprint: string) {
+  const gpgArgs = [
+    '--list-secret-keys',
+    fingerprint
+  ]
+  const result = await command.exec('gpg', gpgArgs)
 
   return result.status
 }

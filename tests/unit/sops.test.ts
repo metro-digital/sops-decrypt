@@ -18,27 +18,27 @@ import * as sops from '../../src/sops'
 import * as command from '../../src/command'
 import * as core from '@actions/core'
 import * as toolsCache from '@actions/tool-cache'
-import { mocked } from 'ts-jest/utils'
+import { mocked } from 'jest-mock'
 
 jest.mock('@actions/core')
 jest.mock('@actions/tool-cache')
 jest.mock('../../src/command')
 jest.mock('../../src/gpg')
 
-let mockCacheFile: jest.Mock
-let mockDownloadTool: jest.Mock
-let mockFindTool: jest.Mock
-let mockAddPath: jest.Mock
-let mockExecutePermission: jest.Mock
-let mockExec: jest.Mock
+let mockCacheFile: jest.MockedFunction<typeof toolsCache.cacheFile>
+let mockDownloadTool: jest.MockedFunction<typeof toolsCache.downloadTool>
+let mockFindTool: jest.MockedFunction<typeof toolsCache.find>
+let mockAddPath: jest.MockedFunction<typeof core.addPath>
+let mockExecutePermission: jest.MockedFunction<typeof jest.fn>
+let mockExec: jest.MockedFunction<typeof command.exec>
 
 beforeEach(() => {
-  mockCacheFile = mocked(toolsCache.cacheFile, true)
-  mockDownloadTool = mocked(toolsCache.downloadTool, true)
-  mockFindTool = mocked(toolsCache.find, true)
-  mockAddPath = mocked(core.addPath, true)
+  mockCacheFile = mocked(toolsCache.cacheFile)
+  mockDownloadTool = mocked(toolsCache.downloadTool)
+  mockFindTool = mocked(toolsCache.find)
+  mockAddPath = mocked(core.addPath)
   mockExecutePermission = jest.fn()
-  mockExec = mocked(command.exec, true)
+  mockExec = mocked(command.exec)
 })
 
 afterEach(() => {
@@ -139,11 +139,11 @@ describe('When execution of sops command', () => {
   const secretFile = 'folder1/encrypted_file.yaml'
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockResolvedValue({
         status: true,
         output: 'decrypted',
         error: ''
-      } as command.Result)
+      })
     })
 
     it('should pass the right arguments', async () => {
@@ -164,11 +164,11 @@ describe('When execution of sops command', () => {
 
   describe('is a failure', () => {
     beforeEach(() => {
-      mockExec.mockReturnValue({
+      mockExec.mockResolvedValue({
         status: false,
         output: '',
         error: 'Error message from SOPS'
-      } as command.Result)
+      })
     })
 
     it('should throw an error', async () => {
@@ -184,19 +184,19 @@ describe('When execution of sops command', () => {
 
 describe('When getting the output format', () => {
   describe('if format is not specified', () => {
-    it('should return json as default', async () => {
+    it('should return json as default', () => {
       const expected = 'json'
 
-      const actual = await sops.getOutputFormat('')
+      const actual = sops.getOutputFormat('')
 
       expect(actual).toStrictEqual(expected)
     })
   })
   describe('If format is not supported by the action', () => {
-    it('should throw an error', async () => {
+    it('should throw an error', () => {
       const outputType = 'file'
       const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`
-      await expect(sops.getOutputFormat(outputType)).rejects.toThrowError(expectedErrorMsg)
+      expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg)
     })
   })
 })

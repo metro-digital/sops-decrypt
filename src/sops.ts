@@ -27,27 +27,23 @@ export enum OutputFormat {
   DOTENV = 'dotenv'
 }
 
-export async function decrypt (sops: string, secretFile: string, outputType: string) : Promise<string> {
+export async function decrypt (sops: string, secretFile: string, outputType: string) {
   const sopsArgs: string[] = []
   sopsArgs.push('--decrypt')
   sopsArgs.push('--output-type', outputType)
   sopsArgs.push(secretFile)
   core.info(`Decrypting the secrets to ${outputType} format`)
-  const result: command.Result = await command.exec(sops, sopsArgs)
+  const result = await command.exec(sops, sopsArgs)
   if (!result.status) {
     core.info('Unable to decrypt the secrets')
-    return new Promise((resolve, reject) => {
-      reject(new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`))
-    })
+    throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`)
   }
 
   core.info('Successfully decrypted the secrets')
-  return new Promise((resolve) => {
-    resolve(result.output)
-  })
+  return result.output
 }
 
-export async function install (version: string, chmod: Function) {
+export async function install (version: string, chmod: (path: string, mode: string) => void) {
   const extension = process.platform === 'win32' ? '.exe' : ''
   const url = downloadURL(version)
   const binaryPath = await download(version, extension, url)
@@ -70,8 +66,8 @@ export async function download (version: string, extension:string, url: string) 
     let downloadedToolPath: string
     try {
       downloadedToolPath = await toolCache.downloadTool(url)
-    } catch (error) {
-      core.debug(error)
+    } catch (error: unknown) {
+      core.debug((error as Error).message)
       throw new Error(`Failed to download version ${version}: ${error}`)
     }
 
@@ -91,19 +87,17 @@ export async function download (version: string, extension:string, url: string) 
   return executablePath
 }
 
-export function getOutputFormat (outputType: string): Promise<string> {
-  if (Object.values(OutputFormat).includes(outputType as OutputFormat)) {
-    return new Promise((resolve) => {
-      resolve(outputType)
-    })
+function isOutputFormat (value: string): value is OutputFormat {
+  return Object.values(OutputFormat).includes(value as OutputFormat)
+}
+
+export function getOutputFormat (outputType: string): OutputFormat {
+  if (isOutputFormat(outputType)) {
+    return outputType
   } else if (!outputType) {
     core.info('No output_type selected, Defaulting to json')
-    return new Promise((resolve) => {
-      resolve(OutputFormat.JSON)
-    })
+    return OutputFormat.JSON
   }
 
-  return new Promise((resolve, reject) => {
-    reject(new Error(`Output type "${outputType}" is not supported by sops-decrypt`))
-  })
+  throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`)
 }
