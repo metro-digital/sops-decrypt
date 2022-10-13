@@ -5,12 +5,11 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
-    "unitTests": "jest tests/unit/*.test.ts",
-    "integrationTests": "jest tests/integration/*.test.ts",
-    "journeyTests": "jest tests/journey/*.test.ts",
     "lint": "eslint **/*.ts",
-    "test": "jest",
-    "testCoverage": "jest --coverage"
+    "test": "jest --coverage",
+    "test:unit": "jest tests/unit/*.test.ts",
+    "test:integration": "jest tests/integration/*.test.ts",
+    "test:journey": "jest tests/journey/*.test.ts"
   },
   "repository": {
     "type": "git",
