@@ -2,7 +2,7 @@
   "name": "sops-decrypt",
   "version": "0.2.0",
   "description": "",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
     "unitTests": "jest tests/unit/*.test.ts",
