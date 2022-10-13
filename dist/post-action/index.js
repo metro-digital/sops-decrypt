@@ -25,26 +25,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -3266,122 +3246,108 @@ var core2 = __toESM(require_core());
 
 // src/command.ts
 var actionsExec = __toESM(require_exec());
-function exec2(command, args, stdin) {
-  return __async(this, null, function* () {
-    let output = Buffer.from([]);
-    let error = Buffer.from([]);
-    const options = {
-      silent: true,
-      ignoreReturnCode: true,
-      input: Buffer.from(stdin || "")
-    };
-    options.listeners = {
-      stdout: (data) => {
-        output = Buffer.concat([output, data]);
-      },
-      stderr: (data) => {
-        error = Buffer.concat([error, data]);
-      }
-    };
-    const returnCode = yield actionsExec.exec(command, args, options);
-    const result = {
-      status: returnCode === 0,
-      output: output.toString().trim(),
-      error: error.toString().trim()
-    };
-    return result;
-  });
+async function exec2(command, args, stdin) {
+  let output = Buffer.from([]);
+  let error = Buffer.from([]);
+  const options = {
+    silent: true,
+    ignoreReturnCode: true,
+    input: Buffer.from(stdin || "")
+  };
+  options.listeners = {
+    stdout: (data) => {
+      output = Buffer.concat([output, data]);
+    },
+    stderr: (data) => {
+      error = Buffer.concat([error, data]);
+    }
+  };
+  const returnCode = await actionsExec.exec(command, args, options);
+  const result = {
+    status: returnCode === 0,
+    output: output.toString().trim(),
+    error: error.toString().trim()
+  };
+  return result;
 }
 
 // src/gpg.ts
 var core = __toESM(require_core());
-function fingerprint(base64GPGKey) {
-  return __async(this, null, function* () {
-    const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-    const gpgArgs = [
-      "--with-colons",
-      "--import-options",
-      "show-only",
-      "--import",
-      "--fingerprint"
-    ];
-    const gpgResult = yield exec2("gpg", gpgArgs, gpgKey);
-    if (!gpgResult.status) {
-      throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
-    }
-    const fingerprints = gpgResult.output;
-    const startIndex = fingerprints.indexOf("fpr") + 3;
-    const endIndex = fingerprints.indexOf("\n", startIndex);
-    return fingerprints.slice(startIndex, endIndex).replace(/[^a-zA-Z0-9]/g, "");
-  });
+async function fingerprint(base64GPGKey) {
+  const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
+  const gpgArgs = [
+    "--with-colons",
+    "--import-options",
+    "show-only",
+    "--import",
+    "--fingerprint"
+  ];
+  const gpgResult = await exec2("gpg", gpgArgs, gpgKey);
+  if (!gpgResult.status) {
+    throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
+  }
+  const fingerprints = gpgResult.output;
+  const startIndex = fingerprints.indexOf("fpr") + 3;
+  const endIndex = fingerprints.indexOf("\n", startIndex);
+  return fingerprints.slice(startIndex, endIndex).replace(/[^a-zA-Z0-9]/g, "");
 }
-function deleteSecretKey(fingerprint2) {
-  return __async(this, null, function* () {
-    const gpgArgs = [
-      "--batch",
-      "--yes",
-      "--delete-secret-keys",
-      fingerprint2
-    ];
-    const result = yield exec2("gpg", gpgArgs);
-    if (!result.status) {
-      throw new Error(`Deleting private GPG key failed: ${result.error}`);
-    }
-  });
+async function deleteSecretKey(fingerprint2) {
+  const gpgArgs = [
+    "--batch",
+    "--yes",
+    "--delete-secret-keys",
+    fingerprint2
+  ];
+  const result = await exec2("gpg", gpgArgs);
+  if (!result.status) {
+    throw new Error(`Deleting private GPG key failed: ${result.error}`);
+  }
 }
-function deletePublicKey(fingerprint2) {
-  return __async(this, null, function* () {
-    const gpgArgs = [
-      "--batch",
-      "--yes",
-      "--delete-keys",
-      fingerprint2
-    ];
-    const result = yield exec2("gpg", gpgArgs);
-    if (!result.status) {
-      throw new Error(`Deleting gpg public key failed: ${result.error}`);
-    }
-  });
+async function deletePublicKey(fingerprint2) {
+  const gpgArgs = [
+    "--batch",
+    "--yes",
+    "--delete-keys",
+    fingerprint2
+  ];
+  const result = await exec2("gpg", gpgArgs);
+  if (!result.status) {
+    throw new Error(`Deleting gpg public key failed: ${result.error}`);
+  }
 }
-function deleteKey(fingerprint2) {
-  return __async(this, null, function* () {
-    yield deleteSecretKey(fingerprint2);
-    yield deletePublicKey(fingerprint2);
-  });
+async function deleteKey(fingerprint2) {
+  await deleteSecretKey(fingerprint2);
+  await deletePublicKey(fingerprint2);
 }
-function keyExists(fingerprint2) {
-  return __async(this, null, function* () {
-    const gpgArgs = [
-      "--list-secret-keys",
-      fingerprint2
-    ];
-    const result = yield exec2("gpg", gpgArgs);
-    return result.status;
-  });
+async function keyExists(fingerprint2) {
+  const gpgArgs = [
+    "--list-secret-keys",
+    fingerprint2
+  ];
+  const result = await exec2("gpg", gpgArgs);
+  return result.status;
 }
 
 // src/post-action.ts
-function run() {
-  return __async(this, null, function* () {
-    const gpgKey = core2.getState("GPG_KEY");
-    try {
-      if (gpgKey) {
-        core2.info("Getting the fingerprint");
-        const fingerprint2 = yield fingerprint(gpgKey);
-        core2.info("Got the fingerprint");
-        if (yield keyExists(fingerprint2)) {
-          core2.info("Deleting the imported gpg key");
-          yield deleteKey(fingerprint2);
-          core2.info("Successfully deleted the imported gpg key");
-        } else {
-          core2.info("GPG key does not exist");
-        }
+async function run() {
+  const gpgKey = core2.getState("GPG_KEY");
+  try {
+    if (gpgKey) {
+      core2.info("Getting the fingerprint");
+      const fingerprint2 = await fingerprint(gpgKey);
+      core2.info("Got the fingerprint");
+      if (await keyExists(fingerprint2)) {
+        core2.info("Deleting the imported gpg key");
+        await deleteKey(fingerprint2);
+        core2.info("Successfully deleted the imported gpg key");
+      } else {
+        core2.info("GPG key does not exist");
       }
-    } catch (e) {
-      core2.setFailed(`Error while deleting the gpg key ${e.message}`);
-      throw new Error(`Error while deleting the gpg key: ${e.message}`);
     }
-  });
+  } catch (e) {
+    core2.setFailed(`Error while deleting the gpg key ${e.message}`);
+    throw new Error(`Error while deleting the gpg key: ${e.message}`);
+  }
 }
 run().catch((e) => {
   core2.setFailed(e.message);

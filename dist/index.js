@@ -20,26 +20,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -5254,50 +5234,46 @@ var fs = __toESM(require("fs"));
 
 // src/command.ts
 var actionsExec = __toESM(require_exec());
-function exec2(command, args, stdin) {
-  return __async(this, null, function* () {
-    let output = Buffer.from([]);
-    let error = Buffer.from([]);
-    const options = {
-      silent: true,
-      ignoreReturnCode: true,
-      input: Buffer.from(stdin || "")
-    };
-    options.listeners = {
-      stdout: (data) => {
-        output = Buffer.concat([output, data]);
-      },
-      stderr: (data) => {
-        error = Buffer.concat([error, data]);
-      }
-    };
-    const returnCode = yield actionsExec.exec(command, args, options);
-    const result = {
-      status: returnCode === 0,
-      output: output.toString().trim(),
-      error: error.toString().trim()
-    };
-    return result;
-  });
+async function exec2(command, args, stdin) {
+  let output = Buffer.from([]);
+  let error = Buffer.from([]);
+  const options = {
+    silent: true,
+    ignoreReturnCode: true,
+    input: Buffer.from(stdin || "")
+  };
+  options.listeners = {
+    stdout: (data) => {
+      output = Buffer.concat([output, data]);
+    },
+    stderr: (data) => {
+      error = Buffer.concat([error, data]);
+    }
+  };
+  const returnCode = await actionsExec.exec(command, args, options);
+  const result = {
+    status: returnCode === 0,
+    output: output.toString().trim(),
+    error: error.toString().trim()
+  };
+  return result;
 }
 
 // src/gpg.ts
 var core = __toESM(require_core());
-function importKey(base64GPGKey) {
-  return __async(this, null, function* () {
-    const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-    const gpgArgs = [
-      "--import"
-    ];
-    core.info("Importing the gpg key");
-    const result = yield exec2("gpg", gpgArgs, gpgKey);
-    if (!result.status) {
-      core.info("Failed importing the GPG key");
-      throw new Error(`Importing of GPG key failed: ${result.error}`);
-    }
-    core.info("Successfully imported the gpg key");
-    core.saveState("GPG_KEY", base64GPGKey);
-  });
+async function importKey(base64GPGKey) {
+  const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
+  const gpgArgs = [
+    "--import"
+  ];
+  core.info("Importing the gpg key");
+  const result = await exec2("gpg", gpgArgs, gpgKey);
+  if (!result.status) {
+    core.info("Failed importing the GPG key");
+    throw new Error(`Importing of GPG key failed: ${result.error}`);
+  }
+  core.info("Successfully imported the gpg key");
+  core.saveState("GPG_KEY", base64GPGKey);
 }
 
 // src/sops.ts
@@ -5311,61 +5287,55 @@ var OutputFormat = /* @__PURE__ */ ((OutputFormat2) => {
   OutputFormat2["DOTENV"] = "dotenv";
   return OutputFormat2;
 })(OutputFormat || {});
-function decrypt(sops, secretFile, outputType) {
-  return __async(this, null, function* () {
-    const sopsArgs = [];
-    sopsArgs.push("--decrypt");
-    sopsArgs.push("--output-type", outputType);
-    sopsArgs.push(secretFile);
-    core2.info(`Decrypting the secrets to ${outputType} format`);
-    const result = yield exec2(sops, sopsArgs);
-    if (!result.status) {
-      core2.info("Unable to decrypt the secrets");
-      throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`);
-    }
-    core2.info("Successfully decrypted the secrets");
-    return result.output;
-  });
+async function decrypt(sops, secretFile, outputType) {
+  const sopsArgs = [];
+  sopsArgs.push("--decrypt");
+  sopsArgs.push("--output-type", outputType);
+  sopsArgs.push(secretFile);
+  core2.info(`Decrypting the secrets to ${outputType} format`);
+  const result = await exec2(sops, sopsArgs);
+  if (!result.status) {
+    core2.info("Unable to decrypt the secrets");
+    throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`);
+  }
+  core2.info("Successfully decrypted the secrets");
+  return result.output;
 }
-function install(version, chmod) {
-  return __async(this, null, function* () {
-    const extension = process.platform === "win32" ? ".exe" : "";
-    const url = downloadURL(version);
-    const binaryPath = yield download(version, extension, url);
-    chmod(binaryPath, "777");
-    core2.addPath(path.dirname(binaryPath));
-    return binaryPath;
-  });
+async function install(version, chmod) {
+  const extension = process.platform === "win32" ? ".exe" : "";
+  const url = downloadURL(version);
+  const binaryPath = await download(version, extension, url);
+  chmod(binaryPath, "777");
+  core2.addPath(path.dirname(binaryPath));
+  return binaryPath;
 }
 function downloadURL(version) {
   const extension = process.platform === "win32" ? "exe" : process.platform;
   return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`;
 }
-function download(version, extension, url) {
-  return __async(this, null, function* () {
-    let cachedToolpath = toolCache.find(toolName, version);
-    if (!cachedToolpath) {
-      core2.debug(`Downloading ${toolName} from: ${url}`);
-      let downloadedToolPath;
-      try {
-        downloadedToolPath = yield toolCache.downloadTool(url);
-      } catch (error) {
-        core2.debug(error.message);
-        throw new Error(`Failed to download version ${version}: ${error}`);
-      }
-      cachedToolpath = yield toolCache.cacheFile(
-        downloadedToolPath,
-        toolName + extension,
-        toolName,
-        version
-      );
+async function download(version, extension, url) {
+  let cachedToolpath = toolCache.find(toolName, version);
+  if (!cachedToolpath) {
+    core2.debug(`Downloading ${toolName} from: ${url}`);
+    let downloadedToolPath;
+    try {
+      downloadedToolPath = await toolCache.downloadTool(url);
+    } catch (error) {
+      core2.debug(error.message);
+      throw new Error(`Failed to download version ${version}: ${error}`);
     }
-    const executablePath = path.join(
-      cachedToolpath,
-      toolName + extension
+    cachedToolpath = await toolCache.cacheFile(
+      downloadedToolPath,
+      toolName + extension,
+      toolName,
+      version
     );
-    return executablePath;
-  });
+  }
+  const executablePath = path.join(
+    cachedToolpath,
+    toolName + extension
+  );
+  return executablePath;
 }
 function isOutputFormat(value) {
   return Object.values(OutputFormat).includes(value);
@@ -8040,29 +8010,27 @@ var safeLoadAll = renamed("safeLoadAll", "loadAll");
 var safeDump = renamed("safeDump", "dump");
 
 // src/action.ts
-function run() {
-  return __async(this, null, function* () {
-    try {
-      const required = {
-        required: true
-      };
-      const version = core4.getInput("version", required);
-      const gpgKey = core4.getInput("gpg_key", required);
-      const encryptedFile = core4.getInput("file", required);
-      const outputType = core4.getInput("output_type");
-      const outputFormat = getOutputFormat(outputType);
-      const sopsPath = yield install(version, fs.chmodSync);
-      yield importKey(gpgKey);
-      let result = yield decrypt(sopsPath, encryptedFile, outputFormat);
-      hideSecrets(result, outputFormat);
-      if (outputFormat === "json" /* JSON */) {
-        result = JSON.parse(result);
-      }
-      core4.setOutput("data", result);
-    } catch (error) {
-      core4.setFailed(`Failed decrypting the file: ${error.message}`);
+async function run() {
+  try {
+    const required = {
+      required: true
+    };
+    const version = core4.getInput("version", required);
+    const gpgKey = core4.getInput("gpg_key", required);
+    const encryptedFile = core4.getInput("file", required);
+    const outputType = core4.getInput("output_type");
+    const outputFormat = getOutputFormat(outputType);
+    const sopsPath = await install(version, fs.chmodSync);
+    await importKey(gpgKey);
+    let result = await decrypt(sopsPath, encryptedFile, outputFormat);
+    hideSecrets(result, outputFormat);
+    if (outputFormat === "json" /* JSON */) {
+      result = JSON.parse(result);
     }
-  });
+    core4.setOutput("data", result);
+  } catch (error) {
+    core4.setFailed(`Failed decrypting the file: ${error.message}`);
+  }
 }
 function hideSecrets(result, outputFormat) {
   let obj;
