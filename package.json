@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
+    "git:add:dist": "git add dist",
     "lint": "eslint **/*.ts",
     "test": "jest --coverage",
     "test:unit": "jest tests/unit/*.test.ts",
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/metro-digital/sops-decrypt#readme",
   "devDependencies": {
+    "@fastify/pre-commit": "^2.0.2",
     "@tsconfig/node16": "^1.0.3",
     "@types/jest": "^29.1.2",
     "@types/js-yaml": "^4.0.5",
@@ -47,5 +49,10 @@
   },
   "engines": {
     "node": ">=16.0.0"
-  }
+  },
+  "pre-commit": [
+    "lint",
+    "test",
+    "build"
+  ]
 }

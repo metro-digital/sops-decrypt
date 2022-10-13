@@ -3268,8 +3268,8 @@ var core2 = __toESM(require_core());
 var actionsExec = __toESM(require_exec());
 function exec2(command, args, stdin) {
   return __async(this, null, function* () {
-    let output = "";
-    let error = "";
+    let output = Buffer.from([]);
+    let error = Buffer.from([]);
     const options = {
       silent: true,
       ignoreReturnCode: true,
@@ -3277,17 +3277,17 @@ function exec2(command, args, stdin) {
     };
     options.listeners = {
       stdout: (data) => {
-        output += data.toString();
+        output = Buffer.concat([output, data]);
       },
       stderr: (data) => {
-        error += data.toString();
+        error = Buffer.concat([error, data]);
       }
     };
     const returnCode = yield actionsExec.exec(command, args, options);
     const result = {
       status: returnCode === 0,
-      output: output.trim(),
-      error: error.trim()
+      output: output.toString().trim(),
+      error: error.toString().trim()
     };
     return result;
   });
@@ -3298,60 +3298,49 @@ var core = __toESM(require_core());
 function fingerprint(base64GPGKey) {
   return __async(this, null, function* () {
     const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-    const gpgArgs = [];
-    gpgArgs.push("--with-colons");
-    gpgArgs.push("--import-options", "show-only");
-    gpgArgs.push("--import");
-    gpgArgs.push("--fingerprint");
+    const gpgArgs = [
+      "--with-colons",
+      "--import-options",
+      "show-only",
+      "--import",
+      "--fingerprint"
+    ];
     const gpgResult = yield exec2("gpg", gpgArgs, gpgKey);
     if (!gpgResult.status) {
-      return new Promise((resolve, reject) => {
-        reject(new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`));
-      });
+      throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
     }
     const fingerprints = gpgResult.output;
-    const matchingString = "fpr";
-    let fingerprint2 = fingerprints.slice(fingerprints.indexOf(matchingString) + matchingString.length).split("\n")[0];
+    let fingerprint2 = fingerprints.slice(fingerprints.indexOf("fpr") + 3).split("\n")[0];
     fingerprint2 = fingerprint2.replace(/[^a-zA-Z0-9]/g, "");
-    return new Promise((resolve) => {
-      resolve(fingerprint2);
-    });
+    return fingerprint2;
   });
 }
 function deleteSecretKey(fingerprint2) {
   return __async(this, null, function* () {
-    const gpgArgs = [];
-    gpgArgs.push("--batch");
-    gpgArgs.push("--yes");
-    gpgArgs.push("--delete-secret-keys");
-    gpgArgs.push(fingerprint2);
+    const gpgArgs = [
+      "--batch",
+      "--yes",
+      "--delete-secret-keys",
+      fingerprint2
+    ];
     const result = yield exec2("gpg", gpgArgs);
     if (!result.status) {
-      return new Promise((resolve, reject) => {
-        reject(new Error(`Deleting private GPG key failed: ${result.error}`));
-      });
+      throw new Error(`Deleting private GPG key failed: ${result.error}`);
     }
-    return new Promise((resolve) => {
-      resolve();
-    });
   });
 }
 function deletePublicKey(fingerprint2) {
   return __async(this, null, function* () {
-    const gpgArgs = [];
-    gpgArgs.push("--batch");
-    gpgArgs.push("--yes");
-    gpgArgs.push("--delete-keys");
-    gpgArgs.push(fingerprint2);
+    const gpgArgs = [
+      "--batch",
+      "--yes",
+      "--delete-keys",
+      fingerprint2
+    ];
     const result = yield exec2("gpg", gpgArgs);
     if (!result.status) {
-      return new Promise((resolve, reject) => {
-        reject(new Error(`Deleting gpg public key failed: ${result.error}`));
-      });
+      throw new Error(`Deleting gpg public key failed: ${result.error}`);
     }
-    return new Promise((resolve) => {
-      resolve();
-    });
   });
 }
 function deleteKey(fingerprint2) {
@@ -3362,8 +3351,10 @@ function deleteKey(fingerprint2) {
 }
 function keyExists(fingerprint2) {
   return __async(this, null, function* () {
-    const gpgArgs = [];
-    gpgArgs.push("--list-secret-keys", fingerprint2);
+    const gpgArgs = [
+      "--list-secret-keys",
+      fingerprint2
+    ];
     const result = yield exec2("gpg", gpgArgs);
     return result.status;
   });

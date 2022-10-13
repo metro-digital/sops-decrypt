@@ -5256,8 +5256,8 @@ var fs = __toESM(require("fs"));
 var actionsExec = __toESM(require_exec());
 function exec2(command, args, stdin) {
   return __async(this, null, function* () {
-    let output = "";
-    let error = "";
+    let output = Buffer.from([]);
+    let error = Buffer.from([]);
     const options = {
       silent: true,
       ignoreReturnCode: true,
@@ -5265,17 +5265,17 @@ function exec2(command, args, stdin) {
     };
     options.listeners = {
       stdout: (data) => {
-        output += data.toString();
+        output = Buffer.concat([output, data]);
       },
       stderr: (data) => {
-        error += data.toString();
+        error = Buffer.concat([error, data]);
       }
     };
     const returnCode = yield actionsExec.exec(command, args, options);
     const result = {
       status: returnCode === 0,
-      output: output.trim(),
-      error: error.trim()
+      output: output.toString().trim(),
+      error: error.toString().trim()
     };
     return result;
   });
@@ -5286,21 +5286,17 @@ var core = __toESM(require_core());
 function importKey(base64GPGKey) {
   return __async(this, null, function* () {
     const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-    const gpgArgs = [];
-    gpgArgs.push("--import");
+    const gpgArgs = [
+      "--import"
+    ];
     core.info("Importing the gpg key");
     const result = yield exec2("gpg", gpgArgs, gpgKey);
     if (!result.status) {
       core.info("Failed importing the GPG key");
-      return new Promise((resolve, reject) => {
-        reject(new Error(`Importing of GPG key failed: ${result.error}`));
-      });
+      throw new Error(`Importing of GPG key failed: ${result.error}`);
     }
     core.info("Successfully imported the gpg key");
     core.saveState("GPG_KEY", base64GPGKey);
-    return new Promise((resolve) => {
-      resolve();
-    });
   });
 }
 
@@ -5309,12 +5305,7 @@ var core2 = __toESM(require_core());
 var toolCache = __toESM(require_tool_cache());
 var path = __toESM(require("path"));
 var toolName = "sops";
-var OutputFormat = /* @__PURE__ */ ((OutputFormat2) => {
-  OutputFormat2["JSON"] = "json";
-  OutputFormat2["YAML"] = "yaml";
-  OutputFormat2["DOTENV"] = "dotenv";
-  return OutputFormat2;
-})(OutputFormat || {});
+var OutputFormats = ["json", "yaml", "dotenv"];
 function decrypt(sops, secretFile, outputType) {
   return __async(this, null, function* () {
     const sopsArgs = [];
@@ -5325,14 +5316,10 @@ function decrypt(sops, secretFile, outputType) {
     const result = yield exec2(sops, sopsArgs);
     if (!result.status) {
       core2.info("Unable to decrypt the secrets");
-      return new Promise((resolve, reject) => {
-        reject(new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`));
-      });
+      throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`);
     }
     core2.info("Successfully decrypted the secrets");
-    return new Promise((resolve) => {
-      resolve(result.output);
-    });
+    return result.output;
   });
 }
 function install(version, chmod) {
@@ -5375,20 +5362,17 @@ function download(version, extension, url) {
     return executablePath;
   });
 }
+function isOutputFormat(outputFormat) {
+  return OutputFormats.includes(outputFormat);
+}
 function getOutputFormat(outputType) {
-  if (Object.values(OutputFormat).includes(outputType)) {
-    return new Promise((resolve) => {
-      resolve(outputType);
-    });
+  if (isOutputFormat(outputType)) {
+    return outputType;
   } else if (!outputType) {
     core2.info("No output_type selected, Defaulting to json");
-    return new Promise((resolve) => {
-      resolve("json" /* JSON */);
-    });
+    return "json" /* JSON */;
   }
-  return new Promise((resolve, reject) => {
-    reject(new Error(`Output type "${outputType}" is not supported by sops-decrypt`));
-  });
+  throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);
 }
 
 // node_modules/envfile/edition-esnext-esm/index.js
@@ -8061,7 +8045,7 @@ function run() {
       const gpgKey = core4.getInput("gpg_key", required);
       const encryptedFile = core4.getInput("file", required);
       const outputType = core4.getInput("output_type");
-      const outputFormat = yield getOutputFormat(outputType);
+      const outputFormat = getOutputFormat(outputType);
       const sopsPath = yield install(version, fs.chmodSync);
       yield importKey(gpgKey);
       let result = yield decrypt(sopsPath, encryptedFile, outputFormat);
