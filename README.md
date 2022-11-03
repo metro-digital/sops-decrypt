@@ -37,10 +37,14 @@ jobs:
   decrypt-secrets:
     runs-on: ubuntu
     steps:
-      - uses: metro-digital/sops-decrypt
+      - uses: metro-digital/sops-decrypt@v0.x
+        id: secrets
         with:
           version: '3.6.1'
           file: 'ci/secrets/file1.yaml'
           gpg_key: '<private_gpg_key_base64_encoded>'
           output_type: 'json'
+      - name: Access one of the decrypted secrets
+        run: |
+          echo "${{ fromJson(steps.secrets.outputs.data).secret_key }}"
 ```
