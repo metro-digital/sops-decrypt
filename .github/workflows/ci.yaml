@@ -19,21 +19,9 @@ jobs:
     - name: Run linting
       run: |
         npm run lint
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: checkout repo
-      uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - name: Install dependencies
-      run: |
-        npm ci
-    - name: Execute tests
-      run: |
-        npm run test
   build:
+    needs:
+      - lint
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
@@ -53,3 +41,19 @@ jobs:
     - name: Repository Integrity Check
       run: |
         git diff --quiet dist
+  test:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      run: |
+        npm ci
+    - name: Execute tests
+      run: |
+        npm run test
