@@ -57,3 +57,20 @@ jobs:
     - name: Execute tests
       run: |
         npm run test
+  automerge:
+    name: Automerge Dependabot PRs
+    if: >
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.user.login == 'dependabot[bot]'
+    needs:
+      - lint
+      - test
+      - integrity
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3.4.2
+        with:
+          exclude: '@actions/core,@actions/io'
