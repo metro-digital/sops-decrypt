@@ -72,5 +72,3 @@ jobs:
       contents: write
     steps:
       - uses: fastify/github-action-merge-dependabot@v3.4.2
-        with:
-          exclude: '@actions/core,@actions/io'
