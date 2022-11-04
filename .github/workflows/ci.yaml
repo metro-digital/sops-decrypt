@@ -19,7 +19,7 @@ jobs:
     - name: Run linting
       run: |
         npm run lint
-  build:
+  integrity:
     needs:
       - lint
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
         git diff --quiet dist
   test:
     needs:
-      - build
+      - integrity
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
