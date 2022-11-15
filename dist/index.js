@@ -5350,7 +5350,7 @@ function getOutputFormat(outputType) {
   throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);
 }
 
-// node_modules/envfile/edition-esnext-esm/index.js
+// node_modules/envfile/edition-es2019-esm/index.js
 function parse(src) {
   const result = {};
   const lines = src.toString().split("\n");
@@ -5358,7 +5358,7 @@ function parse(src) {
     const match = line.match(/^([^=:#]+?)[=:](.*)/);
     if (match) {
       const key = match[1].trim();
-      const value = match[2].trim();
+      const value = match[2].trim().replace(/['"]+/g, "");
       result[key] = value;
     }
   }
