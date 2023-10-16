@@ -29,7 +29,7 @@
     "@fastify/pre-commit": "^2.0.2",
     "@tsconfig/node16": "^1.0.4",
     "@types/jest": "^29.5.5",
-    "@types/js-yaml": "^4.0.6",
+    "@types/js-yaml": "^4.0.7",
     "@types/node": "^20.8.3",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
