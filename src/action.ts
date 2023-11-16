@@ -19,6 +19,7 @@ import { InputOptions } from '@actions/core'
 import * as fs from 'fs'
 import * as gpg from './gpg'
 import * as sops from './sops'
+// @ts-expect-error issues with loading the shipped types
 import * as envfile from 'envfile'
 import * as yaml from 'js-yaml'
 
