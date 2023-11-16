@@ -17,6 +17,6 @@ outputs:
   data:
     description: 'Decrypted data in JSON'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
   post: 'dist/post-action/index.js'

@@ -1595,7 +1595,7 @@ var require_oidc_utils = __commonJS({
  
         Error Code : ${error.statusCode}
  
-        Error Message: ${error.result.message}`);
+        Error Message: ${error.message}`);
           });
           const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
@@ -5399,7 +5399,7 @@ function getOutputFormat(outputType) {
   throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);
 }
 
-// node_modules/envfile/edition-es2019-esm/index.js
+// node_modules/envfile/edition-es2022-esm/index.js
 function parse2(src) {
   const result = {};
   const lines = src.toString().split("\n");
