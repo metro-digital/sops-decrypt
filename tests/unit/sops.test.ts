@@ -65,7 +65,7 @@ describe('When getting the download URL for SOPS', () => {
   it('should get the right URL for windows platform', () => {
     const version = '3.6.1'
     setPlatform('win32')
-    const expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.exe`
+    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
 
     const actualURL = sops.downloadURL(version)
 
@@ -75,7 +75,7 @@ describe('When getting the download URL for SOPS', () => {
   it('should get the right URL for linux platform', () => {
     const version = '3.6.1'
     setPlatform('linux')
-    const expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.linux`
+    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`
 
     const actualURL = sops.downloadURL(version)
 
@@ -85,7 +85,7 @@ describe('When getting the download URL for SOPS', () => {
   it('should get the right URL for darwin platform', () => {
     const version = '3.6.1'
     setPlatform('darwin')
-    const expectedURL = `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.darwin`
+    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`
 
     const actualURL = sops.downloadURL(version)
 

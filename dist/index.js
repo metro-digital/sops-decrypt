@@ -5360,7 +5360,7 @@ async function install(version2, chmod) {
 }
 function downloadURL(version2) {
   const extension = process.platform === "win32" ? "exe" : process.platform;
-  return `https://github.com/mozilla/sops/releases/download/v${version2}/sops-v${version2}.${extension}`;
+  return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${extension}`;
 }
 async function download(version2, extension, url) {
   let cachedToolpath = toolCache.find(toolName, version2);

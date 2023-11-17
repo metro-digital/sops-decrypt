@@ -55,7 +55,7 @@ export async function install (version: string, chmod: (path: string, mode: stri
 export function downloadURL (version: string) {
   const extension = process.platform === 'win32' ? 'exe' : process.platform
 
-  return `https://github.com/mozilla/sops/releases/download/v${version}/sops-v${version}.${extension}`
+  return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${extension}`
 }
 
 export async function download (version: string, extension:string, url: string) {
