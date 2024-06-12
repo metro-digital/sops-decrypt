@@ -43,4 +43,13 @@ describe('When checking for higher versions of SOPS', () => {
 
     expect(actual).toEqual(expected)
   })
+
+  it('should return true for version v3.8.0-rc.1', () => {
+    const version = '3.8.0-rc.1'
+    const expected = true
+
+    const actual = sops.isVersionGreaterThan371(version)
+
+    expect(actual).toEqual(expected)
+  })
 })
