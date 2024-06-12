@@ -52,44 +52,86 @@ afterEach(() => {
 
 describe('When getting the download URL for SOPS', () => {
   let originalPlatform: string
+  let originalArch: string
   beforeEach(() => {
     originalPlatform = process.platform
+    originalArch = process.arch
   })
 
   afterEach(() => {
     Object.defineProperty(process, 'platform', {
       value: originalPlatform
     })
+    Object.defineProperty(process, 'arch', {
+      value: originalArch
+    })
   })
 
-  it('should get the right URL for windows platform', () => {
-    const version = '3.6.1'
-    setPlatform('win32')
-    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
+  describe('for versions lower than 3.7.1', () => {
+    let version: string
+    beforeEach(() => {
+      version = '3.6.1'
+    })
+    it('should get the right URL for windows platform', () => {
+      setPlatform('win32')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
 
-    const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version)
 
-    expect(actualURL).toEqual(expectedURL)
+      expect(actualURL).toEqual(expectedURL)
+    })
+
+    it('should get the right URL for linux platform', () => {
+      setPlatform('linux')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`
+
+      const actualURL = sops.downloadURL(version)
+
+      expect(actualURL).toEqual(expectedURL)
+    })
+
+    it('should get the right URL for darwin platform', () => {
+      setPlatform('darwin')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`
+
+      const actualURL = sops.downloadURL(version)
+
+      expect(actualURL).toEqual(expectedURL)
+    })
   })
+  describe('for versions greater than 3.7.1', () => {
+    let version: string
+    beforeEach(() => {
+      version = 'v3.8.0'
+    })
+    it('should get the right URL for windows platform', () => {
+      setPlatform('win32')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.exe`
 
-  it('should get the right URL for linux platform', () => {
-    const version = '3.6.1'
-    setPlatform('linux')
-    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`
+      const actualURL = sops.downloadURL(version)
 
-    const actualURL = sops.downloadURL(version)
+      expect(actualURL).toEqual(expectedURL)
+    })
 
-    expect(actualURL).toEqual(expectedURL)
-  })
+    it('should get the right URL for linux platform', () => {
+      setPlatform('linux')
+      setArch('x64')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.linux.amd64`
 
-  it('should get the right URL for darwin platform', () => {
-    const version = '3.6.1'
-    setPlatform('darwin')
-    const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`
+      const actualURL = sops.downloadURL(version)
 
-    const actualURL = sops.downloadURL(version)
+      expect(actualURL).toEqual(expectedURL)
+    })
 
-    expect(actualURL).toEqual(expectedURL)
+    it('should get the right URL for darwin platform', () => {
+      setPlatform('darwin')
+      setArch('arm64')
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.darwin.arm64`
+
+      const actualURL = sops.downloadURL(version)
+
+      expect(actualURL).toEqual(expectedURL)
+    })
   })
 })
 
@@ -204,5 +246,11 @@ describe('When getting the output format', () => {
 function setPlatform (platform:string) {
   Object.defineProperty(process, 'platform', {
     value: platform
+  })
+}
+
+function setArch (arch:string) {
+  Object.defineProperty(process, 'arch', {
+    value: arch
   })
 }

@@ -53,9 +53,33 @@ export async function install (version: string, chmod: (path: string, mode: stri
 }
 
 export function downloadURL (version: string) {
+  version = version.startsWith('v') ? version.slice(1) : version
+  const isHigherVersion = isVersionGreaterThan371(version)
   const extension = process.platform === 'win32' ? 'exe' : process.platform
 
+  if (isHigherVersion && extension !== 'exe') {
+    let arch = process.arch.toString()
+    if (arch === 'x64') {
+      arch = 'amd64'
+    }
+
+    return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${extension}.${arch}`
+  }
+
   return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${extension}`
+}
+
+export function isVersionGreaterThan371 (version: string) {
+  const versionParts = version.split('.')
+  const major = parseInt(versionParts[0])
+  const minor = parseInt(versionParts[1])
+  const patch = parseInt(versionParts[2])
+
+  if (major > 3 || (major === 3 && minor > 7) || (major === 3 && minor === 7 && patch > 1)) {
+    return true
+  }
+
+  return false
 }
 
 export async function download (version: string, extension:string, url: string) {
