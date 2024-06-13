@@ -132,6 +132,27 @@ describe('When getting the download URL for SOPS', () => {
 
       expect(actualURL).toEqual(expectedURL)
     })
+  
+    it('should throw on unsupported platform', () => {
+      setPlatform('android')
+      setArch('arm64')
+
+      expect(() => sops.downloadURL(version)).toThrow('Unsupported platform: android')
+    })
+  
+    it('should throw on unsupported architecture on linux', () => {
+      setPlatform('linux')
+      setArch('riscv64')
+
+      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: riscv64')
+    })
+  
+    it('should throw on unsupported architecture', () => {
+      setPlatform('win32')
+      setArch('mips')
+
+      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: mips')
+    })
   })
 })
 
@@ -243,13 +264,13 @@ describe('When getting the output format', () => {
   })
 })
 
-function setPlatform (platform:string) {
+function setPlatform (platform: typeof process.platform) {
   Object.defineProperty(process, 'platform', {
     value: platform
   })
 }
 
-function setArch (arch:string) {
+function setArch (arch: typeof process.arch) {
   Object.defineProperty(process, 'arch', {
     value: arch
   })

@@ -21988,27 +21988,34 @@ async function install(version2, chmod) {
   return binaryPath;
 }
 function downloadURL(version2) {
-  version2 = version2.startsWith("v") ? version2.slice(1) : version2;
-  const isHigherVersion = isVersionGreaterThan371(version2);
-  const extension = process.platform === "win32" ? "exe" : process.platform;
-  if (isHigherVersion && extension !== "exe") {
-    let arch = process.arch.toString();
-    if (arch === "x64") {
-      arch = "amd64";
-    }
-    return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${extension}.${arch}`;
+  version2 = version2[0] === "v" ? version2.slice(1) : version2;
+  switch (process.platform) {
+    case "darwin":
+    case "linux":
+      if (isVersionGreaterThan371(version2)) {
+        let arch = process.arch;
+        if (arch === "x64") {
+          arch = "amd64";
+        } else if (arch === "arm64") {
+          arch = "arm64";
+        } else {
+          throw new Error(`Unsupported architecture: ${arch}`);
+        }
+        return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${process.platform}.${arch}`;
+      }
+      return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${process.platform}`;
+    case "win32":
+      if (process.arch !== "x64") {
+        throw new Error(`Unsupported architecture: ${process.arch}`);
+      }
+      return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.exe`;
+    default:
+      throw new Error(`Unsupported platform: ${process.platform}`);
   }
-  return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${extension}`;
 }
 function isVersionGreaterThan371(version2) {
-  const versionParts = version2.split(".");
-  const major = parseInt(versionParts[0]);
-  const minor = parseInt(versionParts[1]);
-  const patch = parseInt(versionParts[2]);
-  if (major > 3 || major === 3 && minor > 7 || major === 3 && minor === 7 && patch > 1) {
-    return true;
-  }
-  return false;
+  const [major, minor, patch] = version2.split(".").map(Number);
+  return major > 3 || major === 3 && minor > 7 || major === 3 && minor === 7 && patch > 1;
 }
 async function download(version2, extension, url) {
   let cachedToolpath = toolCache.find(toolName, version2);
