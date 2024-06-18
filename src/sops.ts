@@ -53,12 +53,47 @@ export async function install (version: string, chmod: (path: string, mode: stri
 }
 
 export function downloadURL (version: string) {
-  const extension = process.platform === 'win32' ? 'exe' : process.platform
+  version = version[0] === 'v' ? version.slice(1) : version
 
-  return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${extension}`
+  switch (process.platform) {
+    case 'darwin':
+      // eslint-disable-next-line no-fallthrough
+    case 'linux':
+      if (isVersionGreaterThan371(version)) {
+        let arch: string = process.arch
+        if (arch === 'x64') {
+          arch = 'amd64'
+        } else if (arch === 'arm64') {
+          arch = 'arm64'
+        } else {
+          throw new Error(`Unsupported architecture: ${arch}`)
+        }
+
+        return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${process.platform}.${arch}`
+      }
+
+      return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${process.platform}`
+    case 'win32':
+      if (process.arch !== 'x64') {
+        throw new Error(`Unsupported architecture: ${process.arch}`)
+      }
+      return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
+    default:
+      throw new Error(`Unsupported platform: ${process.platform}`)
+  }
 }
 
-export async function download (version: string, extension:string, url: string) {
+export function isVersionGreaterThan371 (version: string) {
+  const [major, minor, patch] = version.split('.').map(Number)
+
+  return (
+    (major > 3) ||
+    (major === 3 && minor > 7) ||
+    (major === 3 && minor === 7 && patch > 1)
+  )
+}
+
+export async function download (version: string, extension: string, url: string) {
   let cachedToolpath = toolCache.find(toolName, version)
   if (!cachedToolpath) {
     core.debug(`Downloading ${toolName} from: ${url}`)
