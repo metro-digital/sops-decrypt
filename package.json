@@ -6,7 +6,10 @@
   "scripts": {
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
     "git:add:dist": "git add dist",
-    "lint": "eslint **/*.ts",
+    "lint": "npx @biomejs/biome lint",
+    "lint:fix": "npx @biomejs/biome lint --write",
+    "format": "npx @biomejs/biome format",
+    "format:fix": "npx @biomejs/biome format --write",
     "test": "jest --coverage",
     "test:build:ci": ". ./.env-ci && node ./dist/index.js && node ./dist/post-action/index.js",
     "test:build:local": ". ./.env-local && npm run build && node ./dist/index.js && node ./dist/post-action/index.js",
@@ -26,18 +29,13 @@
   },
   "homepage": "https://github.com/metro-digital/sops-decrypt#readme",
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@fastify/pre-commit": "^2.1.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/jest": "^29.5.12",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.4.1",
-    "@typescript-eslint/eslint-plugin": "^7.17.0",
-    "@typescript-eslint/parser": "^7.18.0",
     "esbuild": "^0.23.0",
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.6.0",
     "jest": "^29.7.0",
     "jest-mock": "^29.5.0",
     "ts-jest": "^29.2.3",
@@ -50,7 +48,7 @@
     "js-yaml": "^4.1.0"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.16.0"
   },
   "pre-commit": [
     "lint",
