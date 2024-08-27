@@ -14,63 +14,63 @@
  * limitations under the License.
  */
 
-import * as core from '@actions/core'
-import { InputOptions } from '@actions/core'
-import * as fs from 'fs'
-import * as gpg from './gpg'
-import * as sops from './sops'
+import * as core from "@actions/core";
+import { InputOptions } from "@actions/core";
+import * as fs from "fs";
+import * as gpg from "./gpg";
+import * as sops from "./sops";
 // @ts-expect-error issues with loading the shipped types
-import * as envfile from 'envfile'
-import * as yaml from 'js-yaml'
+import * as envfile from "envfile";
+import * as yaml from "js-yaml";
 
-export async function run () {
+export async function run() {
   try {
     const required: InputOptions = {
-      required: true
-    }
-    const version = core.getInput('version', required)
-    const gpgKey = core.getInput('gpg_key', required)
-    const encryptedFile = core.getInput('file', required)
-    const outputType = core.getInput('output_type')
-    const outputFormat = sops.getOutputFormat(outputType)
-    const sopsPath = await sops.install(version, fs.chmodSync)
-    await gpg.importKey(gpgKey)
-    let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat)
+      required: true,
+    };
+    const version = core.getInput("version", required);
+    const gpgKey = core.getInput("gpg_key", required);
+    const encryptedFile = core.getInput("file", required);
+    const outputType = core.getInput("output_type");
+    const outputFormat = sops.getOutputFormat(outputType);
+    const sopsPath = await sops.install(version, fs.chmodSync);
+    await gpg.importKey(gpgKey);
+    let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat);
 
-    hideSecrets(result, outputFormat)
+    hideSecrets(result, outputFormat);
     if (outputFormat === sops.OutputFormat.JSON) {
-      result = JSON.parse(result)
+      result = JSON.parse(result);
     }
 
-    core.setOutput('data', result)
+    core.setOutput("data", result);
   } catch (error: unknown) {
-    core.setFailed(`Failed decrypting the file: ${(error as Error).message}`)
+    core.setFailed(`Failed decrypting the file: ${(error as Error).message}`);
   }
 }
 
-function hideSecrets (result: string, outputFormat: sops.OutputFormat) :void {
-  let obj: { [key: string]: string }
+function hideSecrets(result: string, outputFormat: sops.OutputFormat): void {
+  let obj: { [key: string]: string };
 
   switch (outputFormat) {
     case sops.OutputFormat.JSON:
-      obj = JSON.parse(result)
-      break
+      obj = JSON.parse(result);
+      break;
     case sops.OutputFormat.YAML:
-      obj = yaml.load(result) as { [key: string]: string }
-      break
+      obj = yaml.load(result) as { [key: string]: string };
+      break;
     case sops.OutputFormat.DOTENV:
-      obj = envfile.parse(result)
-      break
+      obj = envfile.parse(result);
+      break;
   }
 
   for (const property in obj) {
-    const val = '' + obj[property]
-    if (val.indexOf('\n') === -1) {
-      core.setSecret(val)
+    const val = "" + obj[property];
+    if (val.indexOf("\n") === -1) {
+      core.setSecret(val);
     } else {
       // setSecret does not support multiline strings
-      for (const line of val.split('\n')) {
-        core.setSecret(line)
+      for (const line of val.split("\n")) {
+        core.setSecret(line);
       }
     }
   }
