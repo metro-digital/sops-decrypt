@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import * as action from './action'
+import * as action from "./action";
 
-action.run()
+action.run();

@@ -20021,13 +20021,7 @@ async function exec2(command, args, stdin) {
 var core = __toESM(require_core());
 async function fingerprint(base64GPGKey) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-  const gpgArgs = [
-    "--with-colons",
-    "--import-options",
-    "show-only",
-    "--import",
-    "--fingerprint"
-  ];
+  const gpgArgs = ["--with-colons", "--import-options", "show-only", "--import", "--fingerprint"];
   const gpgResult = await exec2("gpg", gpgArgs, gpgKey);
   if (!gpgResult.status) {
     throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
@@ -20038,24 +20032,14 @@ async function fingerprint(base64GPGKey) {
   return fingerprints.slice(startIndex, endIndex).replace(/[^a-zA-Z0-9]/g, "");
 }
 async function deleteSecretKey(fingerprint2) {
-  const gpgArgs = [
-    "--batch",
-    "--yes",
-    "--delete-secret-keys",
-    fingerprint2
-  ];
+  const gpgArgs = ["--batch", "--yes", "--delete-secret-keys", fingerprint2];
   const result = await exec2("gpg", gpgArgs);
   if (!result.status) {
     throw new Error(`Deleting private GPG key failed: ${result.error}`);
   }
 }
 async function deletePublicKey(fingerprint2) {
-  const gpgArgs = [
-    "--batch",
-    "--yes",
-    "--delete-keys",
-    fingerprint2
-  ];
+  const gpgArgs = ["--batch", "--yes", "--delete-keys", fingerprint2];
   const result = await exec2("gpg", gpgArgs);
   if (!result.status) {
     throw new Error(`Deleting gpg public key failed: ${result.error}`);
@@ -20066,10 +20050,7 @@ async function deleteKey(fingerprint2) {
   await deletePublicKey(fingerprint2);
 }
 async function keyExists(fingerprint2) {
-  const gpgArgs = [
-    "--list-secret-keys",
-    fingerprint2
-  ];
+  const gpgArgs = ["--list-secret-keys", fingerprint2];
   const result = await exec2("gpg", gpgArgs);
   return result.status;
 }
