@@ -21988,7 +21988,7 @@ var require_tool_cache = __commonJS({
 
 // src/action.ts
 var core4 = __toESM(require_core());
-var fs = __toESM(require("fs"));
+var fs = __toESM(require("node:fs"));
 
 // src/command.ts
 var actionsExec = __toESM(require_exec());
@@ -22021,9 +22021,7 @@ async function exec2(command, args, stdin) {
 var core = __toESM(require_core());
 async function importKey(base64GPGKey) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
-  const gpgArgs = [
-    "--import"
-  ];
+  const gpgArgs = ["--import"];
   core.info("Importing the gpg key");
   const result = await exec2("gpg", gpgArgs, gpgKey);
   if (!result.status) {
@@ -22037,7 +22035,7 @@ async function importKey(base64GPGKey) {
 // src/sops.ts
 var core2 = __toESM(require_core());
 var toolCache = __toESM(require_tool_cache());
-var path = __toESM(require("path"));
+var path = __toESM(require("node:path"));
 var toolName = "sops";
 var OutputFormat = /* @__PURE__ */ ((OutputFormat2) => {
   OutputFormat2["JSON"] = "json";
@@ -22068,11 +22066,11 @@ async function install(version2, chmod) {
   return binaryPath;
 }
 function downloadURL(version2) {
-  version2 = version2[0] === "v" ? version2.slice(1) : version2;
+  const versionNumber = version2.startsWith("v") ? version2.slice(1) : version2;
   switch (process.platform) {
     case "darwin":
     case "linux":
-      if (isVersionGreaterThan371(version2)) {
+      if (isVersionGreaterThan371(versionNumber)) {
         let arch = process.arch;
         if (arch === "x64") {
           arch = "amd64";
@@ -22081,14 +22079,14 @@ function downloadURL(version2) {
         } else {
           throw new Error(`Unsupported architecture: ${arch}`);
         }
-        return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${process.platform}.${arch}`;
+        return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.${process.platform}.${arch}`;
       }
-      return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.${process.platform}`;
+      return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.${process.platform}`;
     case "win32":
       if (process.arch !== "x64") {
         throw new Error(`Unsupported architecture: ${process.arch}`);
       }
-      return `https://github.com/getsops/sops/releases/download/v${version2}/sops-v${version2}.exe`;
+      return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.exe`;
     default:
       throw new Error(`Unsupported platform: ${process.platform}`);
   }
@@ -22108,17 +22106,9 @@ async function download(version2, extension, url) {
       core2.debug(error.message);
       throw new Error(`Failed to download version ${version2}: ${error}`);
     }
-    cachedToolpath = await toolCache.cacheFile(
-      downloadedToolPath,
-      toolName + extension,
-      toolName,
-      version2
-    );
+    cachedToolpath = await toolCache.cacheFile(downloadedToolPath, toolName + extension, toolName, version2);
   }
-  const executablePath = path.join(
-    cachedToolpath,
-    toolName + extension
-  );
+  const executablePath = path.join(cachedToolpath, toolName + extension);
   return executablePath;
 }
 function isOutputFormat(value) {
@@ -22127,7 +22117,8 @@ function isOutputFormat(value) {
 function getOutputFormat(outputType) {
   if (isOutputFormat(outputType)) {
     return outputType;
-  } else if (!outputType) {
+  }
+  if (!outputType) {
     core2.info("No output_type selected, Defaulting to json");
     return "json" /* JSON */;
   }
@@ -24769,7 +24760,7 @@ function hideSecrets(result, outputFormat) {
       break;
   }
   for (const property in obj) {
-    const val = "" + obj[property];
+    const val = `${obj[property]}`;
     if (val.indexOf("\n") === -1) {
       core4.setSecret(val);
     } else {

@@ -16,7 +16,7 @@
 
 import * as core from "@actions/core";
 import * as toolCache from "@actions/tool-cache";
-import * as path from "path";
+import * as path from "node:path";
 import * as command from "./command";
 
 const toolName = "sops";
@@ -53,13 +53,13 @@ export async function install(version: string, chmod: (path: string, mode: strin
 }
 
 export function downloadURL(version: string) {
-  version = version[0] === "v" ? version.slice(1) : version;
+  const versionNumber = version.startsWith("v") ? version.slice(1) : version;
 
   switch (process.platform) {
     case "darwin":
     // eslint-disable-next-line no-fallthrough
     case "linux":
-      if (isVersionGreaterThan371(version)) {
+      if (isVersionGreaterThan371(versionNumber)) {
         let arch: string = process.arch;
         if (arch === "x64") {
           arch = "amd64";
@@ -69,15 +69,15 @@ export function downloadURL(version: string) {
           throw new Error(`Unsupported architecture: ${arch}`);
         }
 
-        return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${process.platform}.${arch}`;
+        return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.${process.platform}.${arch}`;
       }
 
-      return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.${process.platform}`;
+      return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.${process.platform}`;
     case "win32":
       if (process.arch !== "x64") {
         throw new Error(`Unsupported architecture: ${process.arch}`);
       }
-      return `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`;
+      return `https://github.com/getsops/sops/releases/download/v${versionNumber}/sops-v${versionNumber}.exe`;
     default:
       throw new Error(`Unsupported platform: ${process.platform}`);
   }
@@ -117,7 +117,8 @@ function isOutputFormat(value: string): value is OutputFormat {
 export function getOutputFormat(outputType: string): OutputFormat {
   if (isOutputFormat(outputType)) {
     return outputType;
-  } else if (!outputType) {
+  }
+  if (!outputType) {
     core.info("No output_type selected, Defaulting to json");
     return OutputFormat.JSON;
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as actionsExec from "@actions/exec";
-import { ExecOptions } from "@actions/exec";
+import type { ExecOptions } from "@actions/exec";
 
 export interface Result {
   status: boolean;
