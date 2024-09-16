@@ -32,7 +32,7 @@
     "@biomejs/biome": "1.8.3",
     "@fastify/pre-commit": "^2.1.0",
     "@tsconfig/node20": "^20.1.4",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.13",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.5.4",
     "esbuild": "^0.23.0",
