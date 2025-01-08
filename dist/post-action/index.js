@@ -17568,12 +17568,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info4 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info4, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17583,7 +17583,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info4, data);
               } else {
                 return response;
               }
@@ -17606,8 +17606,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info4 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info4, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17636,7 +17636,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info3, data) {
+      requestRaw(info4, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17648,7 +17648,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info4, data, callbackForResult);
           });
         });
       }
@@ -17658,12 +17658,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info4, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info4.options.headers) {
+            info4.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info4.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17672,7 +17672,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info4.httpModule.request(info4.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17684,7 +17684,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info4.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17720,27 +17720,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https : http;
+        const info4 = {};
+        info4.parsedUrl = requestUrl;
+        const usingSsl = info4.parsedUrl.protocol === "https:";
+        info4.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info4.options = {};
+        info4.options.host = info4.parsedUrl.hostname;
+        info4.options.port = info4.parsedUrl.port ? parseInt(info4.parsedUrl.port) : defaultPort;
+        info4.options.path = (info4.parsedUrl.pathname || "") + (info4.parsedUrl.search || "");
+        info4.options.method = method;
+        info4.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info4.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info4.options.agent = this._getAgent(info4.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info4.options);
           }
         }
-        return info3;
+        return info4;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -19733,10 +19733,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.notice = notice;
-    function info3(message) {
+    function info4(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports2.info = info3;
+    exports2.info = info4;
     function startGroup(name) {
       (0, command_1.issue)("group", name);
     }
@@ -19804,10 +19804,11 @@ __export(post_action_exports, {
   run: () => run
 });
 module.exports = __toCommonJS(post_action_exports);
-var core2 = __toESM(require_core());
+var core3 = __toESM(require_core());
 
 // src/command.ts
 var actionsExec = __toESM(require_exec());
+var core = __toESM(require_core());
 async function exec2(command, args, stdin) {
   let output = Buffer.from([]);
   let error = Buffer.from([]);
@@ -19824,7 +19825,9 @@ async function exec2(command, args, stdin) {
       error = Buffer.concat([error, data]);
     }
   };
+  core.info(`Executing the ${command} command`);
   const returnCode = await actionsExec.exec(command, args, options);
+  core.info(`Executed the ${command} command`);
   const result = {
     status: returnCode === 0,
     output: output.toString().trim(),
@@ -19834,7 +19837,7 @@ async function exec2(command, args, stdin) {
 }
 
 // src/gpg.ts
-var core = __toESM(require_core());
+var core2 = __toESM(require_core());
 async function fingerprint(base64GPGKey) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
   const gpgArgs = ["--with-colons", "--import-options", "show-only", "--import", "--fingerprint"];
@@ -19849,14 +19852,18 @@ async function fingerprint(base64GPGKey) {
 }
 async function deleteSecretKey(fingerprint2) {
   const gpgArgs = ["--batch", "--yes", "--delete-secret-keys", fingerprint2];
+  core2.info("Deleting the private gpg key");
   const result = await exec2("gpg", gpgArgs);
+  core2.info("Deleted the private gpg key");
   if (!result.status) {
     throw new Error(`Deleting private GPG key failed: ${result.error}`);
   }
 }
 async function deletePublicKey(fingerprint2) {
   const gpgArgs = ["--batch", "--yes", "--delete-keys", fingerprint2];
+  core2.info("Deleting the public gpg key");
   const result = await exec2("gpg", gpgArgs);
+  core2.info("Deleted the public gpg key");
   if (!result.status) {
     throw new Error(`Deleting gpg public key failed: ${result.error}`);
   }
@@ -19873,27 +19880,27 @@ async function keyExists(fingerprint2) {
 
 // src/post-action.ts
 async function run() {
-  const gpgKey = core2.getState("GPG_KEY");
+  const gpgKey = core3.getState("GPG_KEY");
   try {
     if (gpgKey) {
-      core2.info("Getting the fingerprint");
+      core3.info("Getting the fingerprint");
       const fingerprint2 = await fingerprint(gpgKey);
-      core2.info("Got the fingerprint");
+      core3.info("Got the fingerprint");
       if (await keyExists(fingerprint2)) {
-        core2.info("Deleting the imported gpg key");
+        core3.info("Deleting the imported gpg key");
         await deleteKey(fingerprint2);
-        core2.info("Successfully deleted the imported gpg key");
+        core3.info("Successfully deleted the imported gpg key");
       } else {
-        core2.info("GPG key does not exist");
+        core3.info("GPG key does not exist");
       }
     }
   } catch (e) {
-    core2.setFailed(`Error while deleting the gpg key ${e.message}`);
+    core3.setFailed(`Error while deleting the gpg key ${e.message}`);
     throw new Error(`Error while deleting the gpg key: ${e.message}`);
   }
 }
 run().catch((e) => {
-  core2.setFailed(e.message);
+  core3.setFailed(e.message);
 });
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

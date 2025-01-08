@@ -17563,12 +17563,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info4 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info4, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17578,7 +17578,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info4, data);
               } else {
                 return response;
               }
@@ -17601,8 +17601,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info4 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info4, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17631,7 +17631,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info3, data) {
+      requestRaw(info4, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17643,7 +17643,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info4, data, callbackForResult);
           });
         });
       }
@@ -17653,12 +17653,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info4, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info4.options.headers) {
+            info4.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info4.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17667,7 +17667,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info4.httpModule.request(info4.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17679,7 +17679,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info4.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17715,27 +17715,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https : http;
+        const info4 = {};
+        info4.parsedUrl = requestUrl;
+        const usingSsl = info4.parsedUrl.protocol === "https:";
+        info4.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info4.options = {};
+        info4.options.host = info4.parsedUrl.hostname;
+        info4.options.port = info4.parsedUrl.port ? parseInt(info4.parsedUrl.port) : defaultPort;
+        info4.options.path = (info4.parsedUrl.pathname || "") + (info4.parsedUrl.search || "");
+        info4.options.method = method;
+        info4.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info4.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info4.options.agent = this._getAgent(info4.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info4.options);
           }
         }
-        return info3;
+        return info4;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -19728,10 +19728,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.notice = notice;
-    function info3(message) {
+    function info4(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports2.info = info3;
+    exports2.info = info4;
     function startGroup(name) {
       (0, command_1.issue)("group", name);
     }
@@ -21214,7 +21214,7 @@ var require_retry_helper = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.RetryHelper = void 0;
-    var core5 = __importStar(require_core());
+    var core6 = __importStar(require_core());
     var RetryHelper = class {
       constructor(maxAttempts, minSeconds, maxSeconds) {
         if (maxAttempts < 1) {
@@ -21237,10 +21237,10 @@ var require_retry_helper = __commonJS({
               if (isRetryable && !isRetryable(err)) {
                 throw err;
               }
-              core5.info(err.message);
+              core6.info(err.message);
             }
             const seconds = this.getSleepAmount();
-            core5.info(`Waiting ${seconds} seconds before trying again`);
+            core6.info(`Waiting ${seconds} seconds before trying again`);
             yield this.sleep(seconds);
             attempt++;
           }
@@ -21319,7 +21319,7 @@ var require_tool_cache = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.evaluateVersions = exports2.isExplicitVersion = exports2.findFromManifest = exports2.getManifestFromRepo = exports2.findAllVersions = exports2.find = exports2.cacheFile = exports2.cacheDir = exports2.extractZip = exports2.extractXar = exports2.extractTar = exports2.extract7z = exports2.downloadTool = exports2.HTTPError = void 0;
-    var core5 = __importStar(require_core());
+    var core6 = __importStar(require_core());
     var io = __importStar(require_io());
     var fs2 = __importStar(require("fs"));
     var mm = __importStar(require_manifest());
@@ -21348,8 +21348,8 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         dest = dest || path2.join(_getTempDirectory(), v4_1.default());
         yield io.mkdirP(path2.dirname(dest));
-        core5.debug(`Downloading ${url}`);
-        core5.debug(`Destination ${dest}`);
+        core6.debug(`Downloading ${url}`);
+        core6.debug(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
@@ -21376,7 +21376,7 @@ var require_tool_cache = __commonJS({
           allowRetries: false
         });
         if (auth) {
-          core5.debug("set auth");
+          core6.debug("set auth");
           if (headers === void 0) {
             headers = {};
           }
@@ -21385,7 +21385,7 @@ var require_tool_cache = __commonJS({
         const response = yield http.get(url, headers);
         if (response.message.statusCode !== 200) {
           const err = new HTTPError(response.message.statusCode);
-          core5.debug(`Failed to download from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+          core6.debug(`Failed to download from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
           throw err;
         }
         const pipeline = util.promisify(stream.pipeline);
@@ -21394,16 +21394,16 @@ var require_tool_cache = __commonJS({
         let succeeded = false;
         try {
           yield pipeline(readStream, fs2.createWriteStream(dest));
-          core5.debug("download complete");
+          core6.debug("download complete");
           succeeded = true;
           return dest;
         } finally {
           if (!succeeded) {
-            core5.debug("download failed");
+            core6.debug("download failed");
             try {
               yield io.rmRF(dest);
             } catch (err) {
-              core5.debug(`Failed to delete '${dest}'. ${err.message}`);
+              core6.debug(`Failed to delete '${dest}'. ${err.message}`);
             }
           }
         }
@@ -21418,7 +21418,7 @@ var require_tool_cache = __commonJS({
         process.chdir(dest);
         if (_7zPath) {
           try {
-            const logLevel = core5.isDebug() ? "-bb1" : "-bb0";
+            const logLevel = core6.isDebug() ? "-bb1" : "-bb0";
             const args = [
               "x",
               logLevel,
@@ -21468,7 +21468,7 @@ var require_tool_cache = __commonJS({
           throw new Error("parameter 'file' is required");
         }
         dest = yield _createExtractFolder(dest);
-        core5.debug("Checking tar --version");
+        core6.debug("Checking tar --version");
         let versionOutput = "";
         yield exec_1.exec("tar --version", [], {
           ignoreReturnCode: true,
@@ -21478,7 +21478,7 @@ var require_tool_cache = __commonJS({
             stderr: (data) => versionOutput += data.toString()
           }
         });
-        core5.debug(versionOutput.trim());
+        core6.debug(versionOutput.trim());
         const isGnuTar = versionOutput.toUpperCase().includes("GNU TAR");
         let args;
         if (flags instanceof Array) {
@@ -21486,7 +21486,7 @@ var require_tool_cache = __commonJS({
         } else {
           args = [flags];
         }
-        if (core5.isDebug() && !flags.includes("v")) {
+        if (core6.isDebug() && !flags.includes("v")) {
           args.push("-v");
         }
         let destArg = dest;
@@ -21518,7 +21518,7 @@ var require_tool_cache = __commonJS({
           args = [flags];
         }
         args.push("-x", "-C", dest, "-f", file);
-        if (core5.isDebug()) {
+        if (core6.isDebug()) {
           args.push("-v");
         }
         const xarPath = yield io.which("xar", true);
@@ -21563,7 +21563,7 @@ var require_tool_cache = __commonJS({
             "-Command",
             pwshCommand
           ];
-          core5.debug(`Using pwsh at path: ${pwshPath}`);
+          core6.debug(`Using pwsh at path: ${pwshPath}`);
           yield exec_1.exec(`"${pwshPath}"`, args);
         } else {
           const powershellCommand = [
@@ -21583,7 +21583,7 @@ var require_tool_cache = __commonJS({
             powershellCommand
           ];
           const powershellPath = yield io.which("powershell", true);
-          core5.debug(`Using powershell at path: ${powershellPath}`);
+          core6.debug(`Using powershell at path: ${powershellPath}`);
           yield exec_1.exec(`"${powershellPath}"`, args);
         }
       });
@@ -21592,7 +21592,7 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         const unzipPath = yield io.which("unzip", true);
         const args = [file];
-        if (!core5.isDebug()) {
+        if (!core6.isDebug()) {
           args.unshift("-q");
         }
         args.unshift("-o");
@@ -21603,8 +21603,8 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version = semver.clean(version) || version;
         arch = arch || os.arch();
-        core5.debug(`Caching tool ${tool} ${version} ${arch}`);
-        core5.debug(`source dir: ${sourceDir}`);
+        core6.debug(`Caching tool ${tool} ${version} ${arch}`);
+        core6.debug(`source dir: ${sourceDir}`);
         if (!fs2.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
@@ -21622,14 +21622,14 @@ var require_tool_cache = __commonJS({
       return __awaiter(this, void 0, void 0, function* () {
         version = semver.clean(version) || version;
         arch = arch || os.arch();
-        core5.debug(`Caching tool ${tool} ${version} ${arch}`);
-        core5.debug(`source file: ${sourceFile}`);
+        core6.debug(`Caching tool ${tool} ${version} ${arch}`);
+        core6.debug(`source file: ${sourceFile}`);
         if (!fs2.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool, version, arch);
         const destPath = path2.join(destFolder, targetFile);
-        core5.debug(`destination file ${destPath}`);
+        core6.debug(`destination file ${destPath}`);
         yield io.cp(sourceFile, destPath);
         _completeToolPath(tool, version, arch);
         return destFolder;
@@ -21653,12 +21653,12 @@ var require_tool_cache = __commonJS({
       if (versionSpec) {
         versionSpec = semver.clean(versionSpec) || "";
         const cachePath = path2.join(_getCacheDirectory(), toolName2, versionSpec, arch);
-        core5.debug(`checking cache: ${cachePath}`);
+        core6.debug(`checking cache: ${cachePath}`);
         if (fs2.existsSync(cachePath) && fs2.existsSync(`${cachePath}.complete`)) {
-          core5.debug(`Found tool in cache ${toolName2} ${versionSpec} ${arch}`);
+          core6.debug(`Found tool in cache ${toolName2} ${versionSpec} ${arch}`);
           toolPath = cachePath;
         } else {
-          core5.debug("not found");
+          core6.debug("not found");
         }
       }
       return toolPath;
@@ -21689,7 +21689,7 @@ var require_tool_cache = __commonJS({
         const http = new httpm.HttpClient("tool-cache");
         const headers = {};
         if (auth) {
-          core5.debug("set auth");
+          core6.debug("set auth");
           headers.authorization = auth;
         }
         const response = yield http.getJson(treeUrl, headers);
@@ -21710,7 +21710,7 @@ var require_tool_cache = __commonJS({
           try {
             releases = JSON.parse(versionsRaw);
           } catch (_a) {
-            core5.debug("Invalid json");
+            core6.debug("Invalid json");
           }
         }
         return releases;
@@ -21736,7 +21736,7 @@ var require_tool_cache = __commonJS({
     function _createToolPath(tool, version, arch) {
       return __awaiter(this, void 0, void 0, function* () {
         const folderPath = path2.join(_getCacheDirectory(), tool, semver.clean(version) || version, arch || "");
-        core5.debug(`destination ${folderPath}`);
+        core6.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io.rmRF(folderPath);
         yield io.rmRF(markerPath);
@@ -21748,19 +21748,19 @@ var require_tool_cache = __commonJS({
       const folderPath = path2.join(_getCacheDirectory(), tool, semver.clean(version) || version, arch || "");
       const markerPath = `${folderPath}.complete`;
       fs2.writeFileSync(markerPath, "");
-      core5.debug("finished caching tool");
+      core6.debug("finished caching tool");
     }
     function isExplicitVersion(versionSpec) {
       const c = semver.clean(versionSpec) || "";
-      core5.debug(`isExplicit: ${c}`);
+      core6.debug(`isExplicit: ${c}`);
       const valid = semver.valid(c) != null;
-      core5.debug(`explicit? ${valid}`);
+      core6.debug(`explicit? ${valid}`);
       return valid;
     }
     exports2.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
       let version = "";
-      core5.debug(`evaluating ${versions.length} versions`);
+      core6.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
           return 1;
@@ -21776,9 +21776,9 @@ var require_tool_cache = __commonJS({
         }
       }
       if (version) {
-        core5.debug(`matched: ${version}`);
+        core6.debug(`matched: ${version}`);
       } else {
-        core5.debug("match not found");
+        core6.debug("match not found");
       }
       return version;
     }
@@ -21804,11 +21804,12 @@ var require_tool_cache = __commonJS({
 });
 
 // src/action.ts
-var core4 = __toESM(require_core());
+var core5 = __toESM(require_core());
 var fs = __toESM(require("node:fs"));
 
 // src/command.ts
 var actionsExec = __toESM(require_exec());
+var core = __toESM(require_core());
 async function exec2(command, args, stdin) {
   let output = Buffer.from([]);
   let error = Buffer.from([]);
@@ -21825,7 +21826,9 @@ async function exec2(command, args, stdin) {
       error = Buffer.concat([error, data]);
     }
   };
+  core.info(`Executing the ${command} command`);
   const returnCode = await actionsExec.exec(command, args, options);
+  core.info(`Executed the ${command} command`);
   const result = {
     status: returnCode === 0,
     output: output.toString().trim(),
@@ -21835,22 +21838,22 @@ async function exec2(command, args, stdin) {
 }
 
 // src/gpg.ts
-var core = __toESM(require_core());
+var core2 = __toESM(require_core());
 async function importKey(base64GPGKey) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
   const gpgArgs = ["--import"];
-  core.info("Importing the gpg key");
+  core2.info("Importing the gpg key");
   const result = await exec2("gpg", gpgArgs, gpgKey);
   if (!result.status) {
-    core.info("Failed importing the GPG key");
+    core2.info("Failed importing the GPG key");
     throw new Error(`Importing of GPG key failed: ${result.error}`);
   }
-  core.info("Successfully imported the gpg key");
-  core.saveState("GPG_KEY", base64GPGKey);
+  core2.info("Successfully imported the gpg key");
+  core2.saveState("GPG_KEY", base64GPGKey);
 }
 
 // src/sops.ts
-var core2 = __toESM(require_core());
+var core3 = __toESM(require_core());
 var toolCache = __toESM(require_tool_cache());
 var path = __toESM(require("node:path"));
 var toolName = "sops";
@@ -21865,13 +21868,13 @@ async function decrypt(sops, secretFile, outputType) {
   sopsArgs.push("--decrypt");
   sopsArgs.push("--output-type", outputType);
   sopsArgs.push(secretFile);
-  core2.info(`Decrypting the secrets to ${outputType} format`);
+  core3.info(`Decrypting the secrets to ${outputType} format`);
   const result = await exec2(sops, sopsArgs);
   if (!result.status) {
-    core2.info("Unable to decrypt the secrets");
+    core3.info("Unable to decrypt the secrets");
     throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`);
   }
-  core2.info("Successfully decrypted the secrets");
+  core3.info("Successfully decrypted the secrets");
   return result.output;
 }
 async function install(version, chmod) {
@@ -21879,7 +21882,7 @@ async function install(version, chmod) {
   const url = downloadURL(version);
   const binaryPath = await download(version, extension, url);
   chmod(binaryPath, "777");
-  core2.addPath(path.dirname(binaryPath));
+  core3.addPath(path.dirname(binaryPath));
   return binaryPath;
 }
 function downloadURL(version) {
@@ -21916,12 +21919,12 @@ function isVersionGreaterThan371(version) {
 async function download(version, extension, url) {
   let cachedToolpath = toolCache.find(toolName, version);
   if (!cachedToolpath) {
-    core2.debug(`Downloading ${toolName} from: ${url}`);
+    core3.debug(`Downloading ${toolName} from: ${url}`);
     let downloadedToolPath;
     try {
       downloadedToolPath = await toolCache.downloadTool(url);
     } catch (error) {
-      core2.debug(error.message);
+      core3.debug(error.message);
       throw new Error(`Failed to download version ${version}: ${error}`);
     }
     cachedToolpath = await toolCache.cacheFile(downloadedToolPath, toolName + extension, toolName, version);
@@ -21937,7 +21940,7 @@ function getOutputFormat(outputType) {
     return outputType;
   }
   if (!outputType) {
-    core2.info("No output_type selected, Defaulting to json");
+    core3.info("No output_type selected, Defaulting to json");
     return "json" /* JSON */;
   }
   throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);
@@ -22527,7 +22530,7 @@ var json = failsafe.extend({
     float
   ]
 });
-var core3 = json;
+var core4 = json;
 var YAML_DATE_REGEXP = new RegExp(
   "^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$"
 );
@@ -22741,7 +22744,7 @@ var set = new type("tag:yaml.org,2002:set", {
   resolve: resolveYamlSet,
   construct: constructYamlSet
 });
-var _default = core3.extend({
+var _default = core4.extend({
   implicit: [
     timestamp,
     merge
@@ -24547,10 +24550,10 @@ async function run() {
     const required = {
       required: true
     };
-    const version = core4.getInput("version", required);
-    const gpgKey = core4.getInput("gpg_key", required);
-    const encryptedFile = core4.getInput("file", required);
-    const outputType = core4.getInput("output_type");
+    const version = core5.getInput("version", required);
+    const gpgKey = core5.getInput("gpg_key", required);
+    const encryptedFile = core5.getInput("file", required);
+    const outputType = core5.getInput("output_type");
     const outputFormat = getOutputFormat(outputType);
     const sopsPath = await install(version, fs.chmodSync);
     await importKey(gpgKey);
@@ -24559,9 +24562,9 @@ async function run() {
     if (outputFormat === "json" /* JSON */) {
       result = JSON.parse(result);
     }
-    core4.setOutput("data", result);
+    core5.setOutput("data", result);
   } catch (error) {
-    core4.setFailed(`Failed decrypting the file: ${error.message}`);
+    core5.setFailed(`Failed decrypting the file: ${error.message}`);
   }
 }
 function hideSecrets(result, outputFormat) {
@@ -24580,10 +24583,10 @@ function hideSecrets(result, outputFormat) {
   for (const property in obj) {
     const val = `${obj[property]}`;
     if (val.indexOf("\n") === -1) {
-      core4.setSecret(val);
+      core5.setSecret(val);
     } else {
       for (const line of val.split("\n")) {
-        core4.setSecret(line);
+        core5.setSecret(line);
       }
     }
   }

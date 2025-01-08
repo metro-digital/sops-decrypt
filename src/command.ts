@@ -15,6 +15,7 @@
  */
 import * as actionsExec from "@actions/exec";
 import type { ExecOptions } from "@actions/exec";
+import * as core from "@actions/core";
 
 export interface Result {
   status: boolean;
@@ -38,7 +39,10 @@ export async function exec(command: string, args: string[], stdin?: string) {
       error = Buffer.concat([error, data]);
     },
   };
+
+  core.info(`Executing the ${command} command`)
   const returnCode = await actionsExec.exec(command, args, options);
+  core.info(`Executed the ${command} command`)
   const result: Result = {
     status: returnCode === 0,
     output: output.toString().trim(),
