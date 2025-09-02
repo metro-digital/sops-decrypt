@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/tool-cache": "^2.0.1",
+    "@actions/tool-cache": "^2.0.2",
     "envfile": "^7.1.0",
     "js-yaml": "^4.1.0"
   },
