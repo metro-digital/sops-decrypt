@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import * as gpg from '../../src/gpg'
 import * as core from '@actions/core'
 import * as command from '../../src/command'
-import { mocked } from 'jest-mock'
 
-jest.mock('../../src/command')
-jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
-jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
-jest.spyOn(core, 'info').mockImplementation(jest.fn())
-jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
+vi.mock('../../src/command')
+vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
+vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
+vi.spyOn(core, 'info').mockImplementation(vi.fn())
+vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
 
-let mockExec: jest.MockedFunction<typeof command.exec>
+let mockExec: MockedFunction<typeof command.exec>
 
 beforeEach(() => {
-  mockExec = mocked(command.exec)
+  mockExec = vi.mocked(command.exec)
 })
 
 afterEach(() => {

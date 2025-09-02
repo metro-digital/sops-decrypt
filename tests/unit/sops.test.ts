@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import * as sops from '../../src/sops'
 import * as command from '../../src/command'
 import * as core from '@actions/core'
 import * as toolsCache from '@actions/tool-cache'
-import { mocked } from 'jest-mock'
 
-jest.mock('@actions/core')
-jest.mock('@actions/tool-cache')
-jest.mock('../../src/command')
-jest.mock('../../src/gpg')
+vi.mock('@actions/core')
+vi.mock('@actions/tool-cache')
+vi.mock('../../src/command')
+vi.mock('../../src/gpg')
 
-let mockCacheFile: jest.MockedFunction<typeof toolsCache.cacheFile>
-let mockDownloadTool: jest.MockedFunction<typeof toolsCache.downloadTool>
-let mockFindTool: jest.MockedFunction<typeof toolsCache.find>
-let mockAddPath: jest.MockedFunction<typeof core.addPath>
-let mockExecutePermission: jest.MockedFunction<typeof jest.fn>
-let mockExec: jest.MockedFunction<typeof command.exec>
+let mockCacheFile: MockedFunction<typeof toolsCache.cacheFile>
+let mockDownloadTool: MockedFunction<typeof toolsCache.downloadTool>
+let mockFindTool: MockedFunction<typeof toolsCache.find>
+let mockAddPath: MockedFunction<typeof core.addPath>
+let mockExecutePermission: MockedFunction<Parameters<typeof sops['install']>[1]>
+let mockExec: MockedFunction<typeof command.exec>
 
 beforeEach(() => {
-  mockCacheFile = mocked(toolsCache.cacheFile)
-  mockDownloadTool = mocked(toolsCache.downloadTool)
-  mockFindTool = mocked(toolsCache.find)
-  mockAddPath = mocked(core.addPath)
-  mockExecutePermission = jest.fn()
-  mockExec = mocked(command.exec)
+  mockCacheFile = vi.mocked(toolsCache.cacheFile)
+  mockDownloadTool = vi.mocked(toolsCache.downloadTool)
+  mockFindTool = vi.mocked(toolsCache.find)
+  mockAddPath = vi.mocked(core.addPath)
+  mockExecutePermission = vi.fn()
+  mockExec = vi.mocked(command.exec)
 })
 
 afterEach(() => {

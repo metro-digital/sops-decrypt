@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import { mocked } from 'jest-mock'
+
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import * as core from '@actions/core'
 import * as action from '../../src/post-action'
 import * as gpg from '../../src/gpg'
 
-jest.mock('../../src/gpg')
+vi.mock('../../src/gpg')
 
-let mockGPGDelete: jest.MockedFunction<typeof gpg.deleteKey>
-let mockFingerprint: jest.MockedFunction<typeof gpg.fingerprint>
-let mockKeyExists: jest.MockedFunction<typeof gpg.keyExists>
+let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>
+let mockFingerprint: MockedFunction<typeof gpg.fingerprint>
+let mockKeyExists: MockedFunction<typeof gpg.keyExists>
 
-jest.spyOn(core, 'info').mockImplementation(jest.fn())
-jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
-jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
+vi.spyOn(core, 'info').mockImplementation(vi.fn())
+vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
+vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
 
 beforeEach(() => {
-  mockGPGDelete = mocked(gpg.deleteKey)
-  mockFingerprint = mocked(gpg.fingerprint)
-  mockKeyExists = mocked(gpg.keyExists)
+  mockGPGDelete = vi.mocked(gpg.deleteKey)
+  mockFingerprint = vi.mocked(gpg.fingerprint)
+  mockKeyExists = vi.mocked(gpg.keyExists)
 })
 
 afterEach(() => {

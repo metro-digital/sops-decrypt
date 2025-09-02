@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import * as gpg from '../../src/gpg'
 import * as core from '@actions/core'
 import * as gpgKeys from '../fixtures/gpg_private_keys'
 
-jest.spyOn(core, 'info').mockImplementation(jest.fn())
-jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
+vi.spyOn(core, 'info').mockImplementation(vi.fn())
+vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
 
 describe('When deleting the gpg key', () => {
   beforeEach(async () => {

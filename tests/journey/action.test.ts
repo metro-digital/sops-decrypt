@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -22,13 +23,13 @@ import * as core from '@actions/core'
 import * as action from '../../src/action'
 import * as gpgKeys from '../fixtures/gpg_private_keys'
 
-jest.spyOn(core, 'debug').mockImplementation(jest.fn())
-jest.spyOn(core, 'addPath').mockImplementation(jest.fn())
-jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
-jest.spyOn(core, 'info').mockImplementation(jest.fn())
-jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
-const mockSetOutput = jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
-const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
+vi.spyOn(core, 'debug').mockImplementation(vi.fn())
+vi.spyOn(core, 'addPath').mockImplementation(vi.fn())
+vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
+vi.spyOn(core, 'info').mockImplementation(vi.fn())
+vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
+const mockSetOutput = vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
+const mockCoreSetSecret = vi.spyOn(core, 'setSecret').mockImplementation(vi.fn())
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools')

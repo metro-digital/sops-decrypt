@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { describe, expect, it } from 'vitest'
 import * as sops from '../../src/sops'
 
 describe('When checking for higher versions of SOPS', () => {

@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import * as fs from 'fs'
-import { mocked } from 'jest-mock'
 import * as core from '@actions/core'
 import * as action from '../../src/action'
 import * as gpg from '../../src/gpg'
 import * as sops from '../../src/sops'
 
-jest.mock('../../src/sops')
-jest.mock('../../src/gpg')
+vi.mock('../../src/sops')
+vi.mock('../../src/gpg')
 
-let mockGPGImport: jest.MockedFunction<typeof gpg.importKey>
-let mockGPGDelete: jest.MockedFunction<typeof gpg.deleteKey>
-let mockSOPSDecrypt: jest.MockedFunction<typeof sops.decrypt>
-let mockSOPSInstall: jest.MockedFunction<typeof sops.install>
-let mockSOPSOutputFormat: jest.MockedFunction<typeof sops.getOutputFormat>
+let mockGPGImport: MockedFunction<typeof gpg.importKey>
+let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>
+let mockSOPSDecrypt: MockedFunction<typeof sops.decrypt>
+let mockSOPSInstall: MockedFunction<typeof sops.install>
+let mockSOPSOutputFormat: MockedFunction<typeof sops.getOutputFormat>
 
-jest.spyOn(core, 'setOutput').mockImplementation(jest.fn())
-const mockCoreSetFailed = jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
-jest.spyOn(core, 'info').mockImplementation(jest.fn())
-jest.spyOn(core, 'saveState').mockImplementation(jest.fn())
-const mockCoreSetSecret = jest.spyOn(core, 'setSecret').mockImplementation(jest.fn())
+vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
+const mockCoreSetFailed = vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
+vi.spyOn(core, 'info').mockImplementation(vi.fn())
+vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
+const mockCoreSetSecret = vi.spyOn(core, 'setSecret').mockImplementation(vi.fn())
 
 beforeEach(() => {
-  mockGPGImport = mocked(gpg.importKey)
-  mockGPGDelete = mocked(gpg.deleteKey)
-  mockSOPSDecrypt = mocked(sops.decrypt)
-  mockSOPSInstall = mocked(sops.install).mockResolvedValue('sops')
-  mockSOPSOutputFormat = mocked(sops.getOutputFormat)
+  mockGPGImport = vi.mocked(gpg.importKey)
+  mockGPGDelete = vi.mocked(gpg.deleteKey)
+  mockSOPSDecrypt = vi.mocked(sops.decrypt)
+  mockSOPSInstall = vi.mocked(sops.install).mockResolvedValue('sops')
+  mockSOPSOutputFormat = vi.mocked(sops.getOutputFormat)
 })
 
 afterEach(() => {
