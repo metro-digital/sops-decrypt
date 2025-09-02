@@ -20,7 +20,7 @@ import * as fs from "node:fs";
 import * as gpg from "./gpg";
 import * as sops from "./sops";
 import * as envfile from "envfile";
-import * as yaml from "js-yaml";
+import * as yaml from "yaml";
 
 export async function run() {
   try {
@@ -55,7 +55,7 @@ function hideSecrets(result: string, outputFormat: sops.OutputFormat): void {
       obj = JSON.parse(result);
       break;
     case sops.OutputFormat.YAML:
-      obj = yaml.load(result) as { [key: string]: string };
+      obj = yaml.parse(result);
       break;
     case sops.OutputFormat.DOTENV:
       obj = envfile.parse(result);
