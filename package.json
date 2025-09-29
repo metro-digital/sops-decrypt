@@ -30,7 +30,7 @@
   "homepage": "https://github.com/metro-digital/sops-decrypt#readme",
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "@fastify/pre-commit": "^2.2.0",
+    "@fastify/pre-commit": "^2.2.1",
     "@tsconfig/node24": "^24.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.5.2",
