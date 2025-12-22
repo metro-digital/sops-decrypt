@@ -43,7 +43,7 @@
     "@actions/core": "^1.11.1",
     "@actions/tool-cache": "^2.0.2",
     "envfile": "^7.1.0",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   },
   "engines": {
     "node": ">=20.16.0"
