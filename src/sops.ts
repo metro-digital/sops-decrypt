@@ -21,11 +21,8 @@ import * as command from "./command";
 
 const toolName = "sops";
 
-export enum OutputFormat {
-  JSON = "json",
-  YAML = "yaml",
-  DOTENV = "dotenv",
-}
+const OutputFormats = ["json", "yaml", "dotenv"] as const;
+export type OutputFormat = (typeof OutputFormats)[number];
 
 export async function decrypt(sops: string, secretFile: string, outputType: string) {
   const sopsArgs: string[] = [];
@@ -111,7 +108,7 @@ export async function download(version: string, extension: string, url: string) 
 }
 
 function isOutputFormat(value: string): value is OutputFormat {
-  return Object.values(OutputFormat).includes(value as OutputFormat);
+  return OutputFormats.includes(value as OutputFormat);
 }
 
 export function getOutputFormat(outputType: string): OutputFormat {
@@ -120,7 +117,7 @@ export function getOutputFormat(outputType: string): OutputFormat {
   }
   if (!outputType) {
     core.info("No output_type selected, Defaulting to json");
-    return OutputFormat.JSON;
+    return "json";
   }
 
   throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);

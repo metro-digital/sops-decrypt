@@ -37,7 +37,7 @@ export async function run() {
     let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat);
 
     hideSecrets(result, outputFormat);
-    if (outputFormat === sops.OutputFormat.JSON) {
+    if (outputFormat === "json") {
       result = JSON.parse(result);
     }
 
@@ -51,13 +51,13 @@ function hideSecrets(result: string, outputFormat: sops.OutputFormat): void {
   let obj: { [key: string]: string };
 
   switch (outputFormat) {
-    case sops.OutputFormat.JSON:
+    case "json":
       obj = JSON.parse(result);
       break;
-    case sops.OutputFormat.YAML:
+    case "yaml":
       obj = yaml.parse(result);
       break;
-    case sops.OutputFormat.DOTENV:
+    case "dotenv":
       obj = envfile.parse(result);
       break;
   }

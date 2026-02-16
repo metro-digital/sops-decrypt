@@ -29086,12 +29086,7 @@ var core3 = __toESM(require_core());
 var toolCache = __toESM(require_tool_cache());
 var path = __toESM(require("node:path"));
 var toolName = "sops";
-var OutputFormat = /* @__PURE__ */ ((OutputFormat2) => {
-  OutputFormat2["JSON"] = "json";
-  OutputFormat2["YAML"] = "yaml";
-  OutputFormat2["DOTENV"] = "dotenv";
-  return OutputFormat2;
-})(OutputFormat || {});
+var OutputFormats = ["json", "yaml", "dotenv"];
 async function decrypt(sops, secretFile, outputType) {
   const sopsArgs = [];
   sopsArgs.push("--decrypt");
@@ -29162,7 +29157,7 @@ async function download(version, extension, url) {
   return executablePath;
 }
 function isOutputFormat(value) {
-  return Object.values(OutputFormat).includes(value);
+  return OutputFormats.includes(value);
 }
 function getOutputFormat(outputType) {
   if (isOutputFormat(outputType)) {
@@ -29170,7 +29165,7 @@ function getOutputFormat(outputType) {
   }
   if (!outputType) {
     core3.info("No output_type selected, Defaulting to json");
-    return "json" /* JSON */;
+    return "json";
   }
   throw new Error(`Output type "${outputType}" is not supported by sops-decrypt`);
 }
@@ -29206,7 +29201,7 @@ async function run() {
     await importKey(gpgKey);
     let result = await decrypt(sopsPath, encryptedFile, outputFormat);
     hideSecrets(result, outputFormat);
-    if (outputFormat === "json" /* JSON */) {
+    if (outputFormat === "json") {
       result = JSON.parse(result);
     }
     core4.setOutput("data", result);
@@ -29217,13 +29212,13 @@ async function run() {
 function hideSecrets(result, outputFormat) {
   let obj;
   switch (outputFormat) {
-    case "json" /* JSON */:
+    case "json":
       obj = JSON.parse(result);
       break;
-    case "yaml" /* YAML */:
+    case "yaml":
       obj = yaml.parse(result);
       break;
-    case "dotenv" /* DOTENV */:
+    case "dotenv":
       obj = parse(result);
       break;
   }
