@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild --bundle --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
+    "build": "esbuild --bundle --format=esm --outfile=./dist/index.js --platform=node ./src/main.ts && esbuild --format=esm --bundle --outfile=./dist/post-action/index.js --platform=node ./src/post-action.ts",
     "git:add:dist": "git add dist",
     "lint": "npx @biomejs/biome lint",
     "lint:fix": "npx @biomejs/biome lint --write",
