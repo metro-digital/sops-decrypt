@@ -17,6 +17,13 @@
 import { createTmpDir } from "../util"
 
 process.env.RUNNER_TEMP = await createTmpDir()
+process.env.RUNNER_TOOL_CACHE = await createTmpDir()
+
+vi.mock('@actions/core', { spy: true})
+vi.mock('@actions/tool-cache', { spy: true })
+vi.mock('../../src/command.js')
+vi.mock('../../src/sops.js', { spy: true })
+vi.mock('../../src/gpg.js')
 
 import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import { sopsInstall, sopsDownloadURL, sopsDecrypt, sopsDownload, sopsGetOutputFormat } from '../../src/sops'
@@ -24,16 +31,11 @@ import { commandExec } from '../../src/command'
 import { cacheFile as toolsCacheCacheFile, downloadTool as toolsCacheDownloadTool, find as toolsCacheFind } from '@actions/tool-cache'
 import { addPath as coreAddPath } from '@actions/core'
 
-vi.mock('@actions/core', { spy: true})
-vi.mock('@actions/tool-cache', { spy: true })
-vi.mock('../../src/command')
-vi.mock('../../src/gpg')
-
 const mockCacheFile = vi.mocked(toolsCacheCacheFile)
 const mockDownloadTool = vi.mocked(toolsCacheDownloadTool)
 const mockFindTool = vi.mocked(toolsCacheFind)
 const mockAddPath = vi.mocked(coreAddPath)
-const mockExecutePermission: MockedFunction<Parameters<typeof sopsInstall>[1]> = vi.fn()
+const mockChmod: MockedFunction<Parameters<typeof sopsInstall>[1]> = vi.fn()
 const mockExec = vi.mocked(commandExec)
 
 afterEach(() => {
@@ -41,7 +43,7 @@ afterEach(() => {
   mockDownloadTool.mockReset()
   mockFindTool.mockReset()
   mockAddPath.mockReset()
-  mockExecutePermission.mockReset()
+  mockChmod.mockReset()
   mockExec.mockReset()
 })
 
@@ -178,16 +180,16 @@ describe('When SOPS is being installed', () => {
     const version = '3.6.1'
     mockCacheFile.mockResolvedValue('binarypath/version')
 
-    await sopsInstall(version, mockExecutePermission)
+    await sopsInstall(version, mockChmod)
 
-    expect(mockExecutePermission).toHaveBeenCalledWith('binarypath/version/sops', '777')
+    expect(mockChmod).toHaveBeenCalledWith('binarypath/version/sops', '777')
   })
 
   it('should add the path of SOPS to PATH variable', async () => {
     const version = '3.6.1'
     mockCacheFile.mockResolvedValue('binarypath/version')
 
-    await sopsInstall(version, mockExecutePermission)
+    await sopsInstall(version, mockChmod)
 
     expect(mockAddPath).toHaveBeenCalledWith('binarypath/version')
   })

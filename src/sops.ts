@@ -20,7 +20,7 @@ import {
   find as toolCacheFind,
   downloadTool as toolCacheDownloadTool,
 } from "@actions/tool-cache";
-import path from "node:path";
+import { dirname as pathDirname, join as pathJoin } from "node:path";
 import { commandExec } from "./command.js";
 
 const toolName = "sops";
@@ -49,7 +49,7 @@ export async function sopsInstall(version: string, chmod: (path: string, mode: s
   const url = sopsDownloadURL(version);
   const binaryPath = await sopsDownload(version, extension, url);
   chmod(binaryPath, "777");
-  coreAddPath(path.dirname(binaryPath));
+  coreAddPath(pathDirname(binaryPath));
   return binaryPath;
 }
 
@@ -91,8 +91,8 @@ export function sopsIsVersionGreaterThan371(version: string) {
 }
 
 export async function sopsDownload(version: string, extension: string, url: string) {
-  let cachedToolpath = toolCacheFind(toolName, version);
-  if (!cachedToolpath) {
+  let cachedToolPath = toolCacheFind(toolName, version);
+  if (!cachedToolPath) {
     coreDebug(`Downloading ${toolName} from: ${url}`);
 
     let downloadedToolPath: string;
@@ -103,10 +103,10 @@ export async function sopsDownload(version: string, extension: string, url: stri
       throw new Error(`Failed to download version ${version}: ${error}`);
     }
 
-    cachedToolpath = await toolCacheCacheFile(downloadedToolPath, toolName + extension, toolName, version);
+    cachedToolPath = await toolCacheCacheFile(downloadedToolPath, toolName + extension, toolName, version);
   }
 
-  const executablePath = path.join(cachedToolpath, toolName + extension);
+  const executablePath = pathJoin(cachedToolPath, toolName + extension);
 
   return executablePath;
 }
