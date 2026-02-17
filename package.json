@@ -35,7 +35,7 @@
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^4.0.18",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.27.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
@@ -43,10 +43,10 @@
     "@actions/core": "^3.0.0",
     "@actions/tool-cache": "^4.0.0",
     "envfile": "^7.1.0",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   },
   "engines": {
-    "node": ">=20.16.0"
+    "node": ">=24.0.0"
   },
   "pre-commit": [
     "lint",
