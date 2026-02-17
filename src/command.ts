@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as actionsExec from "@actions/exec";
-import type { ExecOptions } from "@actions/exec";
-import * as core from "@actions/core";
+import { exec as actionsExec, type ExecOptions } from "@actions/exec";
+import { info as coreInfo } from "@actions/core";
 
 export interface Result {
   status: boolean;
@@ -23,7 +22,7 @@ export interface Result {
   error: string;
 }
 
-export async function exec(command: string, args: string[], stdin?: string) {
+export async function commandExec(command: string, args: string[], stdin?: string) {
   let output = Buffer.from([]);
   let error = Buffer.from([]);
   const options: ExecOptions = {
@@ -40,9 +39,9 @@ export async function exec(command: string, args: string[], stdin?: string) {
     },
   };
 
-  core.info(`Executing the ${command} command`);
-  const returnCode = await actionsExec.exec(command, args, options);
-  core.info(`Executed the ${command} command`);
+  coreInfo(`Executing the ${command} command`);
+  const returnCode = await actionsExec(command, args, options);
+  coreInfo(`Executed the ${command} command`);
   const result: Result = {
     status: returnCode === 0,
     output: output.toString().trim(),

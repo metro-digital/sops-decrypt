@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import * as action from "./action";
+import { actionRun } from "./action.js";
 
-action.run();
+actionRun();

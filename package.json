@@ -21,6 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/metro-digital/sops-decrypt.git"
   },
+  "type": "module",
   "keywords": [],
   "author": "METRO.digital",
   "license": "Apache License Version 2.0",
@@ -39,8 +40,8 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/tool-cache": "^2.0.2",
+    "@actions/core": "^3.0.0",
+    "@actions/tool-cache": "^4.0.0",
     "envfile": "^7.1.0",
     "yaml": "^2.8.1"
   },

@@ -3,6 +3,8 @@
   "exclude": ["node_modules", "**/*.test.ts"],
   "compilerOptions": {
     "strict": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   }
 }

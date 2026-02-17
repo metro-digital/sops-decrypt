@@ -14,35 +14,23 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
-import * as fs from 'fs'
-import * as core from '@actions/core'
-import * as action from '../../src/action'
-import * as gpg from '../../src/gpg'
-import * as sops from '../../src/sops'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import fs from 'fs'
 
+import { setFailed as coreSetFailed, setSecret as coreSetSecret } from '@actions/core'
+import { actionRun } from '../../src/action'
+import { gpgImportKey, gpgDeleteKey} from '../../src/gpg'
+import { sopsDecrypt, sopsInstall, sopsGetOutputFormat } from '../../src/sops'
+
+vi.mock('@actions/core', { spy: true})
 vi.mock('../../src/sops')
 vi.mock('../../src/gpg')
 
-let mockGPGImport: MockedFunction<typeof gpg.importKey>
-let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>
-let mockSOPSDecrypt: MockedFunction<typeof sops.decrypt>
-let mockSOPSInstall: MockedFunction<typeof sops.install>
-let mockSOPSOutputFormat: MockedFunction<typeof sops.getOutputFormat>
-
-vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
-const mockCoreSetFailed = vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
-vi.spyOn(core, 'info').mockImplementation(vi.fn())
-vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
-const mockCoreSetSecret = vi.spyOn(core, 'setSecret').mockImplementation(vi.fn())
-
-beforeEach(() => {
-  mockGPGImport = vi.mocked(gpg.importKey)
-  mockGPGDelete = vi.mocked(gpg.deleteKey)
-  mockSOPSDecrypt = vi.mocked(sops.decrypt)
-  mockSOPSInstall = vi.mocked(sops.install).mockResolvedValue('sops')
-  mockSOPSOutputFormat = vi.mocked(sops.getOutputFormat)
-})
+const mockGPGImport = vi.mocked(gpgImportKey)
+const mockGPGDelete = vi.mocked(gpgDeleteKey)
+const mockSOPSDecrypt = vi.mocked(sopsDecrypt)
+const mockSOPSInstall = vi.mocked(sopsInstall).mockResolvedValue('sops')
+const mockSOPSOutputFormat = vi.mocked(sopsGetOutputFormat)
 
 afterEach(() => {
   mockGPGImport.mockReset()
@@ -72,13 +60,13 @@ describe('When the action is triggered', () => {
     })
 
     it('should install sops with version passed', async () => {
-      await action.run()
+      await actionRun()
 
       expect(mockSOPSInstall).toHaveBeenCalledWith('goodVersion', fs.chmodSync)
     })
 
     it('should import the gpg key passed', async () => {
-      await action.run()
+      await actionRun()
 
       expect(mockGPGImport).toHaveBeenCalledWith(gpgKey)
     })
@@ -86,10 +74,10 @@ describe('When the action is triggered', () => {
     it('should decrypt the secret file passed', async () => {
       mockSOPSInstall.mockResolvedValue('path/to/sops/binary')
       mockSOPSOutputFormat.mockReturnValue("json")
-      await action.run()
+      await actionRun()
 
       expect(mockSOPSDecrypt).toHaveBeenCalledWith('path/to/sops/binary', encryptedFile, 'json')
-      expect(mockCoreSetSecret).toHaveBeenCalledTimes(1)
+      expect(coreSetSecret).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -107,9 +95,9 @@ describe('When the action is triggered', () => {
     it('should throw an error', async () => {
       const expectedErrorMsg = 'Failed decrypting the file: Input required and not supplied: gpg_key'
 
-      await action.run()
+      await actionRun()
 
-      expect(mockCoreSetFailed).toHaveBeenCalledWith(expectedErrorMsg)
+      expect(coreSetFailed).toHaveBeenCalledWith(expectedErrorMsg)
     })
   })
 
@@ -134,9 +122,9 @@ describe('When the action is triggered', () => {
       it('should return the error message', async () => {
         const expectedErrorMsg = 'Failed decrypting the file: Error message from getOutputFormat'
 
-        await action.run()
+        await actionRun()
 
-        expect(mockCoreSetFailed).toBeCalledWith(expectedErrorMsg)
+        expect(coreSetFailed).toBeCalledWith(expectedErrorMsg)
       })
     })
 
@@ -148,9 +136,9 @@ describe('When the action is triggered', () => {
       it('should return the error message', async () => {
         const expectedErrorMsg = 'Failed decrypting the file: Error message from gpg'
 
-        await action.run()
+        await actionRun()
 
-        expect(mockCoreSetFailed).toBeCalledWith(expectedErrorMsg)
+        expect(coreSetFailed).toBeCalledWith(expectedErrorMsg)
       })
     })
 
@@ -162,9 +150,9 @@ describe('When the action is triggered', () => {
       it('should return the error message', async () => {
         const expectedErrorMsg = 'Failed decrypting the file: Error message from sops'
 
-        await action.run()
+        await actionRun()
 
-        expect(mockCoreSetFailed).toBeCalledWith(expectedErrorMsg)
+        expect(coreSetFailed).toBeCalledWith(expectedErrorMsg)
       })
     })
   })

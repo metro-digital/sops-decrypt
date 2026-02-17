@@ -15,21 +15,15 @@
  */
 
 import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
-import * as path from 'path'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as io from '@actions/io'
-import * as core from '@actions/core'
-import * as action from '../../src/action'
-import * as gpgKeys from '../fixtures/gpg_private_keys'
+import path from 'path'
+import fs from 'fs'
+import os from 'os'
+import { setOutput as coreSetOutput, setSecret as coreSetSecret} from "@actions/core"
+import { rmRF as ioRmRF} from '@actions/io'
+import { actionRun } from '../../src/action'
+import { gpg_fixture_base64_private_key1 } from '../fixtures/gpg_private_keys'
 
-vi.spyOn(core, 'debug').mockImplementation(vi.fn())
-vi.spyOn(core, 'addPath').mockImplementation(vi.fn())
-vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
-vi.spyOn(core, 'info').mockImplementation(vi.fn())
-vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
-const mockSetOutput = vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
-const mockCoreSetSecret = vi.spyOn(core, 'setSecret').mockImplementation(vi.fn())
+vi.mock('@actions/core', { spy: true})
 
 const runnerDir = path.join(__dirname, 'runner')
 const toolsDir = path.join(runnerDir, 'tools')
@@ -40,7 +34,7 @@ beforeAll(async () => {
   process.env.RUNNER_TEMP = toolsTempDir
   process.env.INPUT_VERSION = '3.6.1'
   process.env.INPUT_FILE = 'tests/fixtures/sops_encrypted_file.yaml'
-  process.env.INPUT_GPG_KEY = gpgKeys.base64_private_key1
+  process.env.INPUT_GPG_KEY = gpg_fixture_base64_private_key1
 })
 
 afterAll(async () => {
@@ -49,12 +43,12 @@ afterAll(async () => {
   delete process.env.INPUT_VERSION
   delete process.env.INPUT_GPG_KEY
   delete process.env.INPUT_FILE
-  await io.rmRF(runnerDir)
+  await ioRmRF(runnerDir)
 })
 
 describe('When the action is triggered with output not set', () => {
   beforeAll(async () => {
-    await action.run()
+    await actionRun()
   }, 100000)
 
   it('should download the given version of SOPS package', async () => {
@@ -69,9 +63,9 @@ describe('When the action is triggered with output not set', () => {
       Hello: 'world'
     }
 
-    expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
+    expect(coreSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(coreSetSecret).toHaveBeenCalledWith('earth')
+    expect(coreSetSecret).toHaveBeenCalledWith('world')
   })
 })
 
@@ -79,7 +73,7 @@ describe('When the action is triggered with output set to dotenv', () => {
   beforeAll(async () => {
     process.env.INPUT_OUTPUT_TYPE = 'dotenv'
 
-    await action.run()
+    await actionRun()
   }, 100000)
 
   afterAll(async () => {
@@ -95,9 +89,9 @@ describe('When the action is triggered with output set to dotenv', () => {
   it('should be able to set decrypted content as output', async () => {
     const expectedData = 'Planet=earth\nHello=world'
 
-    expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
+    expect(coreSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(coreSetSecret).toHaveBeenCalledWith('earth')
+    expect(coreSetSecret).toHaveBeenCalledWith('world')
   })
 })
 
@@ -105,7 +99,7 @@ describe('When the action is triggered with output set to yaml', () => {
   beforeAll(async () => {
     process.env.INPUT_OUTPUT_TYPE = 'yaml'
 
-    await action.run()
+    await actionRun()
   }, 100000)
 
   afterAll(async () => {
@@ -121,8 +115,8 @@ describe('When the action is triggered with output set to yaml', () => {
   it('should be able to set decrypted content as output', async () => {
     const expectedData = 'Planet: earth\nHello: world'
 
-    expect(mockSetOutput).toHaveBeenCalledWith('data', expectedData)
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('earth')
-    expect(mockCoreSetSecret).toHaveBeenCalledWith('world')
+    expect(coreSetOutput).toHaveBeenCalledWith('data', expectedData)
+    expect(coreSetSecret).toHaveBeenCalledWith('earth')
+    expect(coreSetSecret).toHaveBeenCalledWith('world')
   })
 })

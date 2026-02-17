@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
-import * as gpg from '../../src/gpg'
-import * as core from '@actions/core'
-import * as command from '../../src/command'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { gpgDeletePublicKey, gpgDeleteSecretKey, gpgFingerprint, gpgImportKey } from '../../src/gpg'
+import { commandExec } from '../../src/command'
 
-vi.mock('../../src/command')
-vi.spyOn(core, 'setOutput').mockImplementation(vi.fn())
-vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
-vi.spyOn(core, 'info').mockImplementation(vi.fn())
-vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
+vi.mock('../../src/command', { spy: true })
+vi.mock('@actions/core', { spy: true})
 
-let mockExec: MockedFunction<typeof command.exec>
-
-beforeEach(() => {
-  mockExec = vi.mocked(command.exec)
-})
+const mockExec = vi.mocked(commandExec)
 
 afterEach(() => {
   mockExec.mockReset()
@@ -49,13 +41,13 @@ describe('When importing of a gpg key', () => {
       const expectedArgs: string[] = []
       expectedArgs.push('--import')
 
-      await gpg.importKey(base64Encode('sample_gpg_key'))
+      await gpgImportKey(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async () => {
-      await expect(gpg.importKey(base64Encode('sample_gpg_key'))).resolves.not.toThrow()
+      await expect(gpgImportKey(base64Encode('sample_gpg_key'))).resolves.not.toThrow()
     })
   })
 
@@ -69,12 +61,12 @@ describe('When importing of a gpg key', () => {
     })
 
     it('should throw an error', async () => {
-      await expect(gpg.importKey(base64Encode('sample_gpg_key'))).rejects.toThrow()
+      await expect(gpgImportKey(base64Encode('sample_gpg_key'))).rejects.toThrow()
     })
 
     it('should throw the error returned by the command', async () => {
       const expectedErrorMsg = 'Importing of GPG key failed: Error message from gpg'
-      await expect(gpg.importKey(base64Encode('sample_gpg_key'))).rejects.toThrowError(expectedErrorMsg)
+      await expect(gpgImportKey(base64Encode('sample_gpg_key'))).rejects.toThrowError(expectedErrorMsg)
     })
   })
 })
@@ -96,13 +88,13 @@ describe('When getting fingerprint of a gpg key', () => {
       expectedArgs.push('--import')
       expectedArgs.push('--fingerprint')
 
-      await gpg.fingerprint(base64Encode('sample_gpg_key'))
+      await gpgFingerprint(base64Encode('sample_gpg_key'))
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs, 'sample_gpg_key')
     })
 
     it('should not throw an error', async () => {
-      await expect(gpg.fingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow()
+      await expect(gpgFingerprint(base64Encode('sample_gpg_key'))).resolves.not.toThrow()
     })
   })
 })
@@ -124,13 +116,13 @@ describe('When deleting the secret gpg key', () => {
       expectedArgs.push('--delete-secret-keys')
       expectedArgs.push('sample_fpr')
 
-      await gpg.deleteSecretKey('sample_fpr')
+      await gpgDeleteSecretKey('sample_fpr')
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs)
     })
 
     it('should not throw an error', async () => {
-      await expect(gpg.deleteSecretKey('sample_fpr')).resolves.not.toThrow()
+      await expect(gpgDeleteSecretKey('sample_fpr')).resolves.not.toThrow()
     })
   })
 })
@@ -152,13 +144,13 @@ describe('When deleting the public gpg key', () => {
       expectedArgs.push('--delete-keys')
       expectedArgs.push('sample_fpr')
 
-      await gpg.deletePublicKey('sample_fpr')
+      await gpgDeletePublicKey('sample_fpr')
 
       expect(mockExec).toHaveBeenCalledWith('gpg', expectedArgs)
     })
 
     it('should not throw an error', async () => {
-      await expect(gpg.deletePublicKey('sample_fpr')).resolves.not.toThrow()
+      await expect(gpgDeletePublicKey('sample_fpr')).resolves.not.toThrow()
     })
   })
 })

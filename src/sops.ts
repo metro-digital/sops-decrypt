@@ -14,49 +14,53 @@
  * limitations under the License.
  */
 
-import * as core from "@actions/core";
-import * as toolCache from "@actions/tool-cache";
-import * as path from "node:path";
-import * as command from "./command";
+import { debug as coreDebug, info as coreInfo, addPath as coreAddPath } from "@actions/core";
+import {
+  cacheFile as toolCacheCacheFile,
+  find as toolCacheFind,
+  downloadTool as toolCacheDownloadTool,
+} from "@actions/tool-cache";
+import path from "node:path";
+import { commandExec } from "./command.js";
 
 const toolName = "sops";
 
 const OutputFormats = ["json", "yaml", "dotenv"] as const;
 export type OutputFormat = (typeof OutputFormats)[number];
 
-export async function decrypt(sops: string, secretFile: string, outputType: string) {
+export async function sopsDecrypt(sops: string, secretFile: string, outputType: string) {
   const sopsArgs: string[] = [];
   sopsArgs.push("--decrypt");
   sopsArgs.push("--output-type", outputType);
   sopsArgs.push(secretFile);
-  core.info(`Decrypting the secrets to ${outputType} format`);
-  const result = await command.exec(sops, sopsArgs);
+  coreInfo(`Decrypting the secrets to ${outputType} format`);
+  const result = await commandExec(sops, sopsArgs);
   if (!result.status) {
-    core.info("Unable to decrypt the secrets");
+    coreInfo("Unable to decrypt the secrets");
     throw new Error(`Execution of sops command failed on ${secretFile}: ${result.error}`);
   }
 
-  core.info("Successfully decrypted the secrets");
+  coreInfo("Successfully decrypted the secrets");
   return result.output;
 }
 
-export async function install(version: string, chmod: (path: string, mode: string) => void) {
+export async function sopsInstall(version: string, chmod: (path: string, mode: string) => void) {
   const extension = process.platform === "win32" ? ".exe" : "";
-  const url = downloadURL(version);
-  const binaryPath = await download(version, extension, url);
+  const url = sopsDownloadURL(version);
+  const binaryPath = await sopsDownload(version, extension, url);
   chmod(binaryPath, "777");
-  core.addPath(path.dirname(binaryPath));
+  coreAddPath(path.dirname(binaryPath));
   return binaryPath;
 }
 
-export function downloadURL(version: string) {
+export function sopsDownloadURL(version: string) {
   const versionNumber = version.startsWith("v") ? version.slice(1) : version;
 
   switch (process.platform) {
     case "darwin":
     // eslint-disable-next-line no-fallthrough
     case "linux":
-      if (isVersionGreaterThan371(versionNumber)) {
+      if (sopsIsVersionGreaterThan371(versionNumber)) {
         let arch: string = process.arch;
         if (arch === "x64") {
           arch = "amd64";
@@ -80,26 +84,26 @@ export function downloadURL(version: string) {
   }
 }
 
-export function isVersionGreaterThan371(version: string) {
+export function sopsIsVersionGreaterThan371(version: string) {
   const [major, minor, patch] = version.split(".").map(Number);
 
   return major > 3 || (major === 3 && minor > 7) || (major === 3 && minor === 7 && patch > 1);
 }
 
-export async function download(version: string, extension: string, url: string) {
-  let cachedToolpath = toolCache.find(toolName, version);
+export async function sopsDownload(version: string, extension: string, url: string) {
+  let cachedToolpath = toolCacheFind(toolName, version);
   if (!cachedToolpath) {
-    core.debug(`Downloading ${toolName} from: ${url}`);
+    coreDebug(`Downloading ${toolName} from: ${url}`);
 
     let downloadedToolPath: string;
     try {
-      downloadedToolPath = await toolCache.downloadTool(url);
+      downloadedToolPath = await toolCacheDownloadTool(url);
     } catch (error: unknown) {
-      core.debug((error as Error).message);
+      coreDebug((error as Error).message);
       throw new Error(`Failed to download version ${version}: ${error}`);
     }
 
-    cachedToolpath = await toolCache.cacheFile(downloadedToolPath, toolName + extension, toolName, version);
+    cachedToolpath = await toolCacheCacheFile(downloadedToolPath, toolName + extension, toolName, version);
   }
 
   const executablePath = path.join(cachedToolpath, toolName + extension);
@@ -107,16 +111,16 @@ export async function download(version: string, extension: string, url: string) 
   return executablePath;
 }
 
-function isOutputFormat(value: string): value is OutputFormat {
+function sopsIsOutputFormat(value: string): value is OutputFormat {
   return OutputFormats.includes(value as OutputFormat);
 }
 
-export function getOutputFormat(outputType: string): OutputFormat {
-  if (isOutputFormat(outputType)) {
+export function sopsGetOutputFormat(outputType: string): OutputFormat {
+  if (sopsIsOutputFormat(outputType)) {
     return outputType;
   }
   if (!outputType) {
-    core.info("No output_type selected, Defaulting to json");
+    coreInfo("No output_type selected, Defaulting to json");
     return "json";
   }
 

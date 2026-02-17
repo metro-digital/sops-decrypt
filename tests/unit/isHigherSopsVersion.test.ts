@@ -15,14 +15,14 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import * as sops from '../../src/sops'
+import { sopsIsVersionGreaterThan371} from '../../src/sops'
 
 describe('When checking for higher versions of SOPS', () => {
   it('should return false for version 3.6.1', () => {
     const version = '3.6.1'
     const expected = false
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sopsIsVersionGreaterThan371(version)
 
     expect(actual).toEqual(expected)
   })
@@ -31,7 +31,7 @@ describe('When checking for higher versions of SOPS', () => {
     const version = '3.7.1'
     const expected = false
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sopsIsVersionGreaterThan371(version)
 
     expect(actual).toEqual(expected)
   })
@@ -40,7 +40,7 @@ describe('When checking for higher versions of SOPS', () => {
     const version = '3.8.0'
     const expected = true
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sopsIsVersionGreaterThan371(version)
 
     expect(actual).toEqual(expected)
   })
@@ -49,7 +49,7 @@ describe('When checking for higher versions of SOPS', () => {
     const version = '3.8.0-rc.1'
     const expected = true
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sopsIsVersionGreaterThan371(version)
 
     expect(actual).toEqual(expected)
   })

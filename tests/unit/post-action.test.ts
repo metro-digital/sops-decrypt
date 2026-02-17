@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
-import * as core from '@actions/core'
-import * as action from '../../src/post-action'
-import * as gpg from '../../src/gpg'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { postActionRun  } from '../../src/post-action'
+import { gpgDeleteKey, gpgFingerprint, gpgKeyExists } from '../../src/gpg'
 
 vi.mock('../../src/gpg')
+vi.mock('@actions/core', { spy: true})
 
-let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>
-let mockFingerprint: MockedFunction<typeof gpg.fingerprint>
-let mockKeyExists: MockedFunction<typeof gpg.keyExists>
-
-vi.spyOn(core, 'info').mockImplementation(vi.fn())
-vi.spyOn(core, 'setFailed').mockImplementation(vi.fn())
-vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
-
-beforeEach(() => {
-  mockGPGDelete = vi.mocked(gpg.deleteKey)
-  mockFingerprint = vi.mocked(gpg.fingerprint)
-  mockKeyExists = vi.mocked(gpg.keyExists)
-})
+const mockGPGDelete = vi.mocked(gpgDeleteKey)
+const mockFingerprint = vi.mocked(gpgFingerprint)
+const mockKeyExists = vi.mocked(gpgKeyExists)
 
 afterEach(() => {
   mockGPGDelete.mockReset()
@@ -57,7 +46,7 @@ describe('When the post action is triggered', () => {
 
       it('should delete the gpg key imported', async () => {
         mockFingerprint.mockResolvedValue('fpr')
-        await action.run()
+        await postActionRun()
 
         expect(mockGPGDelete).toHaveBeenCalledWith('fpr')
       })
@@ -69,7 +58,7 @@ describe('When the post action is triggered', () => {
 
       it('should not try to delete the gpg key', async () => {
         mockFingerprint.mockResolvedValue('fpr')
-        await action.run()
+        await postActionRun()
 
         expect(mockGPGDelete).not.toHaveBeenCalled()
       })
@@ -83,7 +72,7 @@ describe('When the post action is triggered', () => {
         it('should return the error message', async () => {
           const expectedErrorMsg = 'Error while deleting the gpg key: Error message from fingerprint'
 
-          await expect(action.run()).rejects.toThrowError(expectedErrorMsg)
+          await expect(postActionRun()).rejects.toThrowError(expectedErrorMsg)
         })
       })
 
@@ -96,7 +85,7 @@ describe('When the post action is triggered', () => {
         it('should return the error message', async () => {
           const expectedErrorMsg = 'Error while deleting the gpg key: Error message while deleting the gpg key'
 
-          await expect(action.run()).rejects.toThrowError(expectedErrorMsg)
+          await expect(postActionRun()).rejects.toThrowError(expectedErrorMsg)
         })
       })
     })
@@ -104,7 +93,7 @@ describe('When the post action is triggered', () => {
 
   describe('when the state variable is not set', () => {
     it('should not get the fingerprint', async () => {
-      await action.run()
+      await postActionRun()
 
       expect(mockFingerprint).not.toHaveBeenCalled()
     })

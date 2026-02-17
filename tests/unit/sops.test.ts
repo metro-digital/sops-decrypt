@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
-import * as sops from '../../src/sops'
-import * as command from '../../src/command'
-import * as core from '@actions/core'
-import * as toolsCache from '@actions/tool-cache'
+import { createTmpDir } from "../util"
 
-vi.mock('@actions/core')
-vi.mock('@actions/tool-cache')
+process.env.RUNNER_TEMP = await createTmpDir()
+
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
+import { sopsInstall, sopsDownloadURL, sopsDecrypt, sopsDownload, sopsGetOutputFormat } from '../../src/sops'
+import { commandExec } from '../../src/command'
+import { cacheFile as toolsCacheCacheFile, downloadTool as toolsCacheDownloadTool, find as toolsCacheFind } from '@actions/tool-cache'
+import { addPath as coreAddPath } from '@actions/core'
+
+vi.mock('@actions/core', { spy: true})
+vi.mock('@actions/tool-cache', { spy: true })
 vi.mock('../../src/command')
 vi.mock('../../src/gpg')
 
-let mockCacheFile: MockedFunction<typeof toolsCache.cacheFile>
-let mockDownloadTool: MockedFunction<typeof toolsCache.downloadTool>
-let mockFindTool: MockedFunction<typeof toolsCache.find>
-let mockAddPath: MockedFunction<typeof core.addPath>
-let mockExecutePermission: MockedFunction<Parameters<typeof sops['install']>[1]>
-let mockExec: MockedFunction<typeof command.exec>
-
-beforeEach(() => {
-  mockCacheFile = vi.mocked(toolsCache.cacheFile)
-  mockDownloadTool = vi.mocked(toolsCache.downloadTool)
-  mockFindTool = vi.mocked(toolsCache.find)
-  mockAddPath = vi.mocked(core.addPath)
-  mockExecutePermission = vi.fn()
-  mockExec = vi.mocked(command.exec)
-})
+const mockCacheFile = vi.mocked(toolsCacheCacheFile)
+const mockDownloadTool = vi.mocked(toolsCacheDownloadTool)
+const mockFindTool = vi.mocked(toolsCacheFind)
+const mockAddPath = vi.mocked(coreAddPath)
+const mockExecutePermission: MockedFunction<Parameters<typeof sopsInstall>[1]> = vi.fn()
+const mockExec = vi.mocked(commandExec)
 
 afterEach(() => {
   mockCacheFile.mockReset()
@@ -76,7 +71,7 @@ describe('When getting the download URL for SOPS', () => {
       setPlatform('win32')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -85,7 +80,7 @@ describe('When getting the download URL for SOPS', () => {
       setPlatform('linux')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -94,7 +89,7 @@ describe('When getting the download URL for SOPS', () => {
       setPlatform('darwin')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -108,7 +103,7 @@ describe('When getting the download URL for SOPS', () => {
       setPlatform('win32')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.exe`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -118,7 +113,7 @@ describe('When getting the download URL for SOPS', () => {
       setArch('x64')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.linux.amd64`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -128,7 +123,7 @@ describe('When getting the download URL for SOPS', () => {
       setArch('arm64')
       const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.darwin.arm64`
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sopsDownloadURL(version)
 
       expect(actualURL).toEqual(expectedURL)
     })
@@ -137,21 +132,21 @@ describe('When getting the download URL for SOPS', () => {
       setPlatform('android')
       setArch('arm64')
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported platform: android')
+      expect(() => sopsDownloadURL(version)).toThrow('Unsupported platform: android')
     })
   
     it('should throw on unsupported architecture on linux', () => {
       setPlatform('linux')
       setArch('riscv64')
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: riscv64')
+      expect(() => sopsDownloadURL(version)).toThrow('Unsupported architecture: riscv64')
     })
   
     it('should throw on unsupported architecture', () => {
       setPlatform('win32')
       setArch('mips')
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: mips')
+      expect(() => sopsDownloadURL(version)).toThrow('Unsupported architecture: mips')
     })
   })
 })
@@ -162,7 +157,7 @@ describe('When SOPS is being downloaded', () => {
     mockCacheFile.mockResolvedValue('binarypath')
     mockFindTool.mockReturnValue('')
 
-    await sops.download(version, 'someextension', 'someurl')
+    await sopsDownload(version, 'someextension', 'someurl')
 
     expect(mockDownloadTool).toHaveBeenCalledWith('someurl')
   })
@@ -172,7 +167,7 @@ describe('When SOPS is being downloaded', () => {
     mockCacheFile.mockResolvedValue('binarypath')
     mockFindTool.mockReturnValue('binarypath')
 
-    await sops.download(version, 'someextension', 'someurl')
+    await sopsDownload(version, 'someextension', 'someurl')
 
     expect(mockDownloadTool).not.toHaveBeenCalled()
   })
@@ -183,7 +178,7 @@ describe('When SOPS is being installed', () => {
     const version = '3.6.1'
     mockCacheFile.mockResolvedValue('binarypath/version')
 
-    await sops.install(version, mockExecutePermission)
+    await sopsInstall(version, mockExecutePermission)
 
     expect(mockExecutePermission).toHaveBeenCalledWith('binarypath/version/sops', '777')
   })
@@ -192,7 +187,7 @@ describe('When SOPS is being installed', () => {
     const version = '3.6.1'
     mockCacheFile.mockResolvedValue('binarypath/version')
 
-    await sops.install(version, mockExecutePermission)
+    await sopsInstall(version, mockExecutePermission)
 
     expect(mockAddPath).toHaveBeenCalledWith('binarypath/version')
   })
@@ -215,13 +210,13 @@ describe('When execution of sops command', () => {
       expectedArgs.push('--output-type', 'json')
       expectedArgs.push(secretFile)
 
-      await sops.decrypt('sops', secretFile, 'json')
+      await sopsDecrypt('sops', secretFile, 'json')
 
       expect(mockExec).toHaveBeenCalledWith('sops', expectedArgs)
     })
 
     it('should not throw an error', async () => {
-      await expect(sops.decrypt('sops', secretFile, 'json')).resolves.not.toThrow()
+      await expect(sopsDecrypt('sops', secretFile, 'json')).resolves.not.toThrow()
     })
   })
 
@@ -235,12 +230,12 @@ describe('When execution of sops command', () => {
     })
 
     it('should throw an error', async () => {
-      await expect(sops.decrypt('sops', secretFile, '')).rejects.toThrow()
+      await expect(sopsDecrypt('sops', secretFile, '')).rejects.toThrow()
     })
 
     it('should throw the error returned by the command', async () => {
       const expectedErrorMsg = `Execution of sops command failed on ${secretFile}: Error message from SOPS`
-      await expect(sops.decrypt('sops', secretFile, '')).rejects.toThrowError(expectedErrorMsg)
+      await expect(sopsDecrypt('sops', secretFile, '')).rejects.toThrowError(expectedErrorMsg)
     })
   })
 })
@@ -250,7 +245,7 @@ describe('When getting the output format', () => {
     it('should return json as default', () => {
       const expected = 'json'
 
-      const actual = sops.getOutputFormat('')
+      const actual = sopsGetOutputFormat('')
 
       expect(actual).toStrictEqual(expected)
     })
@@ -259,7 +254,7 @@ describe('When getting the output format', () => {
     it('should throw an error', () => {
       const outputType = 'file'
       const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`
-      expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg)
+      expect(() => sopsGetOutputFormat(outputType)).toThrowError(expectedErrorMsg)
     })
   })
 })

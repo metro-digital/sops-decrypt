@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import * as command from "./command";
-import * as core from "@actions/core";
+import { commandExec } from "./command.js";
+import { info as coreInfo, saveState as coreSaveState } from "@actions/core";
 
-export async function importKey(base64GPGKey: string) {
+export async function gpgImportKey(base64GPGKey: string) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
   const gpgArgs = ["--import"];
 
-  core.info("Importing the gpg key");
-  const result = await command.exec("gpg", gpgArgs, gpgKey);
+  coreInfo("Importing the gpg key");
+  const result = await commandExec("gpg", gpgArgs, gpgKey);
   if (!result.status) {
-    core.info("Failed importing the GPG key");
+    coreInfo("Failed importing the GPG key");
     throw new Error(`Importing of GPG key failed: ${result.error}`);
   }
 
-  core.info("Successfully imported the gpg key");
-  core.saveState("GPG_KEY", base64GPGKey);
+  coreInfo("Successfully imported the gpg key");
+  coreSaveState("GPG_KEY", base64GPGKey);
 }
 
-export async function fingerprint(base64GPGKey: string) {
+export async function gpgFingerprint(base64GPGKey: string) {
   const gpgKey = Buffer.from(base64GPGKey, "base64").toString();
   const gpgArgs = ["--with-colons", "--import-options", "show-only", "--import", "--fingerprint"];
 
-  const gpgResult = await command.exec("gpg", gpgArgs, gpgKey);
+  const gpgResult = await commandExec("gpg", gpgArgs, gpgKey);
   if (!gpgResult.status) {
     throw new Error(`Unable to get the fingerprint of the gpg key: ${gpgResult.error}`);
   }
@@ -60,36 +60,36 @@ export async function fingerprint(base64GPGKey: string) {
   return fingerprints.slice(startIndex, endIndex).replace(/[^a-zA-Z0-9]/g, "");
 }
 
-export async function deleteSecretKey(fingerprint: string) {
+export async function gpgDeleteSecretKey(fingerprint: string) {
   const gpgArgs = ["--batch", "--yes", "--delete-secret-keys", fingerprint];
 
-  core.info("Deleting the private gpg key");
-  const result = await command.exec("gpg", gpgArgs);
-  core.info("Deleted the private gpg key");
+  coreInfo("Deleting the private gpg key");
+  const result = await commandExec("gpg", gpgArgs);
+  coreInfo("Deleted the private gpg key");
   if (!result.status) {
     throw new Error(`Deleting private GPG key failed: ${result.error}`);
   }
 }
 
-export async function deletePublicKey(fingerprint: string) {
+export async function gpgDeletePublicKey(fingerprint: string) {
   const gpgArgs = ["--batch", "--yes", "--delete-keys", fingerprint];
 
-  core.info("Deleting the public gpg key");
-  const result = await command.exec("gpg", gpgArgs);
-  core.info("Deleted the public gpg key");
+  coreInfo("Deleting the public gpg key");
+  const result = await commandExec("gpg", gpgArgs);
+  coreInfo("Deleted the public gpg key");
   if (!result.status) {
     throw new Error(`Deleting gpg public key failed: ${result.error}`);
   }
 }
 
-export async function deleteKey(fingerprint: string) {
-  await deleteSecretKey(fingerprint);
-  await deletePublicKey(fingerprint);
+export async function gpgDeleteKey(fingerprint: string) {
+  await gpgDeleteSecretKey(fingerprint);
+  await gpgDeletePublicKey(fingerprint);
 }
 
-export async function keyExists(fingerprint: string) {
+export async function gpgKeyExists(fingerprint: string) {
   const gpgArgs = ["--list-secret-keys", fingerprint];
-  const result = await command.exec("gpg", gpgArgs);
+  const result = await commandExec("gpg", gpgArgs);
 
   return result.status;
 }

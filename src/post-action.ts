@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import * as core from "@actions/core";
-import * as gpg from "./gpg";
+import { info as coreInfo, getState as coreGetState, setFailed as coreSetFailed } from "@actions/core";
+import { gpgFingerprint, gpgKeyExists, gpgDeleteKey } from "./gpg.js";
 
-export async function run() {
-  const gpgKey = core.getState("GPG_KEY");
+export async function postActionRun() {
+  const gpgKey = coreGetState("GPG_KEY");
   try {
     if (gpgKey) {
-      core.info("Getting the fingerprint");
-      const fingerprint = await gpg.fingerprint(gpgKey);
-      core.info("Got the fingerprint");
-      if (await gpg.keyExists(fingerprint)) {
-        core.info("Deleting the imported gpg key");
-        await gpg.deleteKey(fingerprint);
-        core.info("Successfully deleted the imported gpg key");
+      coreInfo("Getting the fingerprint");
+      const fingerprint = await gpgFingerprint(gpgKey);
+      coreInfo("Got the fingerprint");
+      if (await gpgKeyExists(fingerprint)) {
+        coreInfo("Deleting the imported gpg key");
+        await gpgDeleteKey(fingerprint);
+        coreInfo("Successfully deleted the imported gpg key");
       } else {
-        core.info("GPG key does not exist");
+        coreInfo("GPG key does not exist");
       }
     }
   } catch (e: unknown) {
-    core.setFailed(`Error while deleting the gpg key ${(e as Error).message}`);
+    coreSetFailed(`Error while deleting the gpg key ${(e as Error).message}`);
     throw new Error(`Error while deleting the gpg key: ${(e as Error).message}`);
   }
 }
 
-run().catch((e) => {
-  core.setFailed(e.message);
+postActionRun().catch((e) => {
+  coreSetFailed(e.message);
 });
