@@ -38,6 +38,6 @@ export async function postActionRun() {
   }
 }
 
-postActionRun().catch((e) => {
+await postActionRun().catch((e) => {
   coreSetFailed(e.message);
 });
