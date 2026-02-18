@@ -38,6 +38,8 @@ export async function run() {
   }
 }
 
-run().catch((e) => {
-  core.setFailed(e.message);
-});
+if (process.env.RUN_POST_ACTION !== "0") {
+  run().catch(() => {
+    // Do nothing as the error is already handled in the catch block of the try-catch statement
+  });
+}

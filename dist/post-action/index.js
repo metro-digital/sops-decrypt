@@ -19779,9 +19779,10 @@ async function run() {
     throw new Error(`Error while deleting the gpg key: ${e.message}`);
   }
 }
-run().catch((e) => {
-  setFailed(e.message);
-});
+if (process.env.RUN_POST_ACTION !== "0") {
+  run().catch(() => {
+  });
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   run

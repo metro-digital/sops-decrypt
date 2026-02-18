@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+process.env.RUN_POST_ACTION = "0";
+
 import { describe, expect, it, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
 import * as core from "@actions/core";
 import * as action from "../../src/post-action";
