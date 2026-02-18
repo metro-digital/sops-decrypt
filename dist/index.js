@@ -29735,14 +29735,24 @@ async function exec2(command, args, stdin) {
     }
   };
   info(`Executing the ${command} command`);
-  const returnCode = await exec(command, args, options);
-  info(`Executed the ${command} command`);
-  const result = {
-    status: returnCode === 0,
-    output: output.toString().trim(),
-    error: error2.toString().trim()
-  };
-  return result;
+  try {
+    const returnCode = await exec(command, args, options);
+    const result = {
+      status: returnCode === 0,
+      output: output.toString().trim(),
+      error: error2.toString().trim()
+    };
+    info(`Executed the ${command} command`);
+    return result;
+  } catch (e) {
+    const result = {
+      status: false,
+      output: output.toString().trim(),
+      error: e.message
+    };
+    error(`Executed and failed the ${command} command`);
+    return result;
+  }
 }
 
 // src/gpg.ts
