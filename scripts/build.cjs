@@ -2,7 +2,6 @@ require('esbuild').build({
   entryPoints: ['./src/main.ts'],
   bundle: true,
   platform: 'node',
-  format: 'esm',
   outfile: 'dist/index.js',
   sourcemap: false,
   banner: {
@@ -16,7 +15,6 @@ require('esbuild').build({
   entryPoints: ['./src/post-action.ts'],
   bundle: true,
   platform: 'node',
-  format: 'esm',
   outfile: 'dist/post-action/index.js',
   sourcemap: false,
   banner: {
