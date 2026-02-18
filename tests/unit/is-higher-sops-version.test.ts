@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { sopsIsVersionGreaterThan371} from '../../src/sops'
+import { sopsIsVersionGreaterThan371 } from '../../src/sops.js'
 
 describe('When checking for higher versions of SOPS', () => {
   it('should return false for version 3.6.1', () => {
