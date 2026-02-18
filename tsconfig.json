@@ -1,4 +1,10 @@
 {
   "extends": "@tsconfig/node24/tsconfig.json",
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts"],
+  "compilerOptions": {
+    "strict": true,
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
 }
