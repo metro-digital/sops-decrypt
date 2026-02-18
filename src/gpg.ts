@@ -63,9 +63,9 @@ export async function fingerprint(base64GPGKey: string) {
 export async function deleteSecretKey(fingerprint: string) {
   const gpgArgs = ["--batch", "--yes", "--delete-secret-keys", fingerprint];
 
-  core.info("Deleting the private gpg key")
+  core.info("Deleting the private gpg key");
   const result = await command.exec("gpg", gpgArgs);
-  core.info("Deleted the private gpg key")
+  core.info("Deleted the private gpg key");
   if (!result.status) {
     throw new Error(`Deleting private GPG key failed: ${result.error}`);
   }
@@ -74,9 +74,9 @@ export async function deleteSecretKey(fingerprint: string) {
 export async function deletePublicKey(fingerprint: string) {
   const gpgArgs = ["--batch", "--yes", "--delete-keys", fingerprint];
 
-  core.info("Deleting the public gpg key")
+  core.info("Deleting the public gpg key");
   const result = await command.exec("gpg", gpgArgs);
-  core.info("Deleted the public gpg key")
+  core.info("Deleted the public gpg key");
   if (!result.status) {
     throw new Error(`Deleting gpg public key failed: ${result.error}`);
   }
