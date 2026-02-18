@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import * as util from "node:util";
 import * as core from "@actions/core";
 import type { InputOptions } from "@actions/core";
 import * as fs from "node:fs";
 import * as gpg from "./gpg";
 import * as sops from "./sops";
-import * as envfile from "envfile";
 import * as yaml from "yaml";
 
 export async function run() {
@@ -37,7 +37,7 @@ export async function run() {
     let result = await sops.decrypt(sopsPath, encryptedFile, outputFormat);
 
     hideSecrets(result, outputFormat);
-    if (outputFormat === sops.OutputFormat.JSON) {
+    if (outputFormat === "json") {
       result = JSON.parse(result);
     }
 
@@ -48,17 +48,17 @@ export async function run() {
 }
 
 function hideSecrets(result: string, outputFormat: sops.OutputFormat): void {
-  let obj: { [key: string]: string };
+  let obj: NodeJS.Dict<string>;
 
   switch (outputFormat) {
-    case sops.OutputFormat.JSON:
+    case "json":
       obj = JSON.parse(result);
       break;
-    case sops.OutputFormat.YAML:
+    case "yaml":
       obj = yaml.parse(result);
       break;
-    case sops.OutputFormat.DOTENV:
-      obj = envfile.parse(result);
+    case "dotenv":
+      obj = util.parseEnv(result);
       break;
   }
 
