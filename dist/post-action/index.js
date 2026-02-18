@@ -1,6 +1,3 @@
-import { createRequire } from "node:module";
-let require = createRequire(import.meta.url);
-
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;

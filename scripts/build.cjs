@@ -3,12 +3,7 @@ require('esbuild').build({
   bundle: true,
   platform: 'node',
   outfile: 'dist/index.js',
-  sourcemap: false,
-  banner: {
-    js: `import { createRequire } from "node:module";
-let require = createRequire(import.meta.url);
-`
-  }
+  sourcemap: false
 })
 
 require('esbuild').build({
@@ -16,10 +11,5 @@ require('esbuild').build({
   bundle: true,
   platform: 'node',
   outfile: 'dist/post-action/index.js',
-  sourcemap: false,
-  banner: {
-    js: `import { createRequire } from "node:module";
-let require = createRequire(import.meta.url);
-`
-  }
+  sourcemap: false
 })
