@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
 import * as gpg from "../../src/gpg";
 import * as core from "@actions/core";
 import * as command from "../../src/command";
 
+vi.mock("@actions/core", { spy: true });
 vi.mock("../../src/command");
-vi.spyOn(core, "setOutput").mockImplementation(vi.fn());
-vi.spyOn(core, "setFailed").mockImplementation(vi.fn());
-vi.spyOn(core, "info").mockImplementation(vi.fn());
-vi.spyOn(core, "saveState").mockImplementation(vi.fn());
+vi.mocked(core.setOutput).mockImplementation(vi.fn());
+vi.mocked(core.setFailed).mockImplementation(vi.fn());
+vi.mocked(core.info).mockImplementation(vi.fn());
+vi.mocked(core.saveState).mockImplementation(vi.fn());
 
 let mockExec: MockedFunction<typeof command.exec>;
 

@@ -15,21 +15,24 @@
  */
 
 import { describe, expect, it, vi, beforeAll, afterAll } from "vitest";
-import * as path from "path";
-import * as fs from "fs";
-import * as os from "os";
+import * as path from "node:path";
+import * as fs from "node:fs";
+import * as os from "node:os";
 import * as io from "@actions/io";
 import * as core from "@actions/core";
 import * as action from "../../src/action";
 import * as gpgKeys from "../fixtures/gpg_private_keys";
 
-vi.spyOn(core, "debug").mockImplementation(vi.fn());
-vi.spyOn(core, "addPath").mockImplementation(vi.fn());
-vi.spyOn(core, "setFailed").mockImplementation(vi.fn());
-vi.spyOn(core, "info").mockImplementation(vi.fn());
-vi.spyOn(core, "saveState").mockImplementation(vi.fn());
-const mockSetOutput = vi.spyOn(core, "setOutput").mockImplementation(vi.fn());
-const mockCoreSetSecret = vi.spyOn(core, "setSecret").mockImplementation(vi.fn());
+vi.mock("@actions/core", { spy: true });
+
+vi.mocked(core.debug).mockImplementation(vi.fn());
+vi.mocked(core.addPath).mockImplementation(vi.fn());
+vi.mocked(core.setFailed).mockImplementation(vi.fn());
+vi.mocked(core.info).mockImplementation(vi.fn());
+vi.mocked(core.saveState).mockImplementation(vi.fn());
+
+const mockSetOutput = vi.mocked(core.setOutput).mockImplementation(vi.fn());
+const mockCoreSetSecret = vi.mocked(core.setSecret).mockImplementation(vi.fn());
 
 const runnerDir = path.join(__dirname, "runner");
 const toolsDir = path.join(runnerDir, "tools");

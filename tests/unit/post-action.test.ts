@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
 import * as core from "@actions/core";
 import * as action from "../../src/post-action";
 import * as gpg from "../../src/gpg";
 
+vi.mock("@actions/core", { spy: true });
 vi.mock("../../src/gpg");
 
 let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>;
 let mockFingerprint: MockedFunction<typeof gpg.fingerprint>;
 let mockKeyExists: MockedFunction<typeof gpg.keyExists>;
 
-vi.spyOn(core, "info").mockImplementation(vi.fn());
-vi.spyOn(core, "setFailed").mockImplementation(vi.fn());
-vi.spyOn(core, "saveState").mockImplementation(vi.fn());
+vi.mocked(core.info).mockImplementation(vi.fn());
+vi.mocked(core.setFailed).mockImplementation(vi.fn());
+vi.mocked(core.saveState).mockImplementation(vi.fn());
 
 beforeEach(() => {
   mockGPGDelete = vi.mocked(gpg.deleteKey);

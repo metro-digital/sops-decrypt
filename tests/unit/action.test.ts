@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from "vitest";
-import * as fs from "fs";
+import { describe, expect, it, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
+import * as fs from "node:fs";
 import * as core from "@actions/core";
 import * as action from "../../src/action";
 import * as gpg from "../../src/gpg";
@@ -23,6 +23,7 @@ import * as sops from "../../src/sops";
 
 vi.mock("../../src/sops");
 vi.mock("../../src/gpg");
+vi.mock("@actions/core", { spy: true });
 
 let mockGPGImport: MockedFunction<typeof gpg.importKey>;
 let mockGPGDelete: MockedFunction<typeof gpg.deleteKey>;
@@ -30,11 +31,11 @@ let mockSOPSDecrypt: MockedFunction<typeof sops.decrypt>;
 let mockSOPSInstall: MockedFunction<typeof sops.install>;
 let mockSOPSOutputFormat: MockedFunction<typeof sops.getOutputFormat>;
 
-vi.spyOn(core, "setOutput").mockImplementation(vi.fn());
-const mockCoreSetFailed = vi.spyOn(core, "setFailed").mockImplementation(vi.fn());
-vi.spyOn(core, "info").mockImplementation(vi.fn());
-vi.spyOn(core, "saveState").mockImplementation(vi.fn());
-const mockCoreSetSecret = vi.spyOn(core, "setSecret").mockImplementation(vi.fn());
+vi.mocked(core.setOutput).mockImplementation(vi.fn());
+const mockCoreSetFailed = vi.mocked(core.setFailed).mockImplementation(vi.fn());
+vi.mocked(core.info).mockImplementation(vi.fn());
+vi.mocked(core.saveState).mockImplementation(vi.fn());
+const mockCoreSetSecret = vi.mocked(core.setSecret).mockImplementation(vi.fn());
 
 beforeEach(() => {
   mockGPGImport = vi.mocked(gpg.importKey);

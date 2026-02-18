@@ -19,8 +19,10 @@ import * as gpg from "../../src/gpg";
 import * as core from "@actions/core";
 import * as gpgKeys from "../fixtures/gpg_private_keys";
 
-vi.spyOn(core, "info").mockImplementation(vi.fn());
-vi.spyOn(core, "saveState").mockImplementation(vi.fn());
+vi.mock("@actions/core", { spy: true });
+
+vi.mocked(core.info).mockImplementation(vi.fn());
+vi.mocked(core.saveState).mockImplementation(vi.fn());
 
 describe("When deleting the gpg key", () => {
   beforeEach(async () => {

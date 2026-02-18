@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
 import * as sops from "../../src/sops";
 import * as command from "../../src/command";
 import * as core from "@actions/core";
