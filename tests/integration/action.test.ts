@@ -14,53 +14,53 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import * as gpg from '../../src/gpg'
-import * as core from '@actions/core'
-import * as gpgKeys from '../fixtures/gpg_private_keys'
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import * as gpg from "../../src/gpg";
+import * as core from "@actions/core";
+import * as gpgKeys from "../fixtures/gpg_private_keys";
 
-vi.spyOn(core, 'info').mockImplementation(vi.fn())
-vi.spyOn(core, 'saveState').mockImplementation(vi.fn())
+vi.spyOn(core, "info").mockImplementation(vi.fn());
+vi.spyOn(core, "saveState").mockImplementation(vi.fn());
 
-describe('When deleting the gpg key', () => {
+describe("When deleting the gpg key", () => {
   beforeEach(async () => {
-    await gpg.importKey(gpgKeys.base64_private_key1)
-  })
+    await gpg.importKey(gpgKeys.base64_private_key1);
+  });
 
-  it('should be able to get the fingerprint of the key passed', async () => {
-    const expectedFPR = gpgKeys.private_key1_fpr
-    const actualFPR = await gpg.fingerprint(gpgKeys.base64_private_key1)
+  it("should be able to get the fingerprint of the key passed", async () => {
+    const expectedFPR = gpgKeys.private_key1_fpr;
+    const actualFPR = await gpg.fingerprint(gpgKeys.base64_private_key1);
 
-    expect(actualFPR).toEqual(expectedFPR)
-  })
+    expect(actualFPR).toEqual(expectedFPR);
+  });
 
-  it('should delete the key without an error', async () => {
-    await expect(gpg.deleteKey(gpgKeys.private_key1_fpr)).resolves.not.toThrow()
-  })
-})
+  it("should delete the key without an error", async () => {
+    await expect(gpg.deleteKey(gpgKeys.private_key1_fpr)).resolves.not.toThrow();
+  });
+});
 
-describe('When checking for the existence of the gpg key', () => {
-  describe('when gpg key exists', () => {
+describe("When checking for the existence of the gpg key", () => {
+  describe("when gpg key exists", () => {
     beforeEach(async () => {
-      await gpg.importKey(gpgKeys.base64_private_key1)
-    })
+      await gpg.importKey(gpgKeys.base64_private_key1);
+    });
 
     afterEach(async () => {
-      await (gpg.deleteKey(gpgKeys.private_key1_fpr))
-    })
+      await gpg.deleteKey(gpgKeys.private_key1_fpr);
+    });
 
-    it('should return true ', async () => {
-      const actual = await gpg.keyExists(gpgKeys.private_key1_fpr)
+    it("should return true ", async () => {
+      const actual = await gpg.keyExists(gpgKeys.private_key1_fpr);
 
-      expect(actual).toBeTruthy()
-    })
-  })
+      expect(actual).toBeTruthy();
+    });
+  });
 
-  describe('when gpg key does not exist', () => {
-    it('should return false', async () => {
-      const actual = await gpg.keyExists(gpgKeys.private_key1_fpr)
+  describe("when gpg key does not exist", () => {
+    it("should return false", async () => {
+      const actual = await gpg.keyExists(gpgKeys.private_key1_fpr);
 
-      expect(actual).not.toBeTruthy()
-    })
-  })
-})
+      expect(actual).not.toBeTruthy();
+    });
+  });
+});

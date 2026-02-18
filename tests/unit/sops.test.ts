@@ -14,264 +14,264 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
-import * as sops from '../../src/sops'
-import * as command from '../../src/command'
-import * as core from '@actions/core'
-import * as toolsCache from '@actions/tool-cache'
+import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from "vitest";
+import * as sops from "../../src/sops";
+import * as command from "../../src/command";
+import * as core from "@actions/core";
+import * as toolsCache from "@actions/tool-cache";
 
-vi.mock('@actions/core')
-vi.mock('@actions/tool-cache')
-vi.mock('../../src/command')
-vi.mock('../../src/gpg')
+vi.mock("@actions/core");
+vi.mock("@actions/tool-cache");
+vi.mock("../../src/command");
+vi.mock("../../src/gpg");
 
-let mockCacheFile: MockedFunction<typeof toolsCache.cacheFile>
-let mockDownloadTool: MockedFunction<typeof toolsCache.downloadTool>
-let mockFindTool: MockedFunction<typeof toolsCache.find>
-let mockAddPath: MockedFunction<typeof core.addPath>
-let mockExecutePermission: MockedFunction<Parameters<typeof sops['install']>[1]>
-let mockExec: MockedFunction<typeof command.exec>
+let mockCacheFile: MockedFunction<typeof toolsCache.cacheFile>;
+let mockDownloadTool: MockedFunction<typeof toolsCache.downloadTool>;
+let mockFindTool: MockedFunction<typeof toolsCache.find>;
+let mockAddPath: MockedFunction<typeof core.addPath>;
+let mockExecutePermission: MockedFunction<Parameters<(typeof sops)["install"]>[1]>;
+let mockExec: MockedFunction<typeof command.exec>;
 
 beforeEach(() => {
-  mockCacheFile = vi.mocked(toolsCache.cacheFile)
-  mockDownloadTool = vi.mocked(toolsCache.downloadTool)
-  mockFindTool = vi.mocked(toolsCache.find)
-  mockAddPath = vi.mocked(core.addPath)
-  mockExecutePermission = vi.fn()
-  mockExec = vi.mocked(command.exec)
-})
+  mockCacheFile = vi.mocked(toolsCache.cacheFile);
+  mockDownloadTool = vi.mocked(toolsCache.downloadTool);
+  mockFindTool = vi.mocked(toolsCache.find);
+  mockAddPath = vi.mocked(core.addPath);
+  mockExecutePermission = vi.fn();
+  mockExec = vi.mocked(command.exec);
+});
 
 afterEach(() => {
-  mockCacheFile.mockReset()
-  mockDownloadTool.mockReset()
-  mockFindTool.mockReset()
-  mockAddPath.mockReset()
-  mockExecutePermission.mockReset()
-  mockExec.mockReset()
-})
+  mockCacheFile.mockReset();
+  mockDownloadTool.mockReset();
+  mockFindTool.mockReset();
+  mockAddPath.mockReset();
+  mockExecutePermission.mockReset();
+  mockExec.mockReset();
+});
 
-describe('When getting the download URL for SOPS', () => {
-  let originalPlatform: string
-  let originalArch: string
+describe("When getting the download URL for SOPS", () => {
+  let originalPlatform: string;
+  let originalArch: string;
   beforeEach(() => {
-    originalPlatform = process.platform
-    originalArch = process.arch
-  })
+    originalPlatform = process.platform;
+    originalArch = process.arch;
+  });
 
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: originalPlatform
-    })
-    Object.defineProperty(process, 'arch', {
-      value: originalArch
-    })
-  })
+    Object.defineProperty(process, "platform", {
+      value: originalPlatform,
+    });
+    Object.defineProperty(process, "arch", {
+      value: originalArch,
+    });
+  });
 
-  describe('for versions lower than 3.7.1', () => {
-    let version: string
+  describe("for versions lower than 3.7.1", () => {
+    let version: string;
     beforeEach(() => {
-      version = '3.6.1'
-    })
-    it('should get the right URL for windows platform', () => {
-      setPlatform('win32')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`
+      version = "3.6.1";
+    });
+    it("should get the right URL for windows platform", () => {
+      setPlatform("win32");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.exe`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
+      expect(actualURL).toEqual(expectedURL);
+    });
 
-    it('should get the right URL for linux platform', () => {
-      setPlatform('linux')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`
+    it("should get the right URL for linux platform", () => {
+      setPlatform("linux");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.linux`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
+      expect(actualURL).toEqual(expectedURL);
+    });
 
-    it('should get the right URL for darwin platform', () => {
-      setPlatform('darwin')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`
+    it("should get the right URL for darwin platform", () => {
+      setPlatform("darwin");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v${version}/sops-v${version}.darwin`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
-  })
-  describe('for versions greater than 3.7.1', () => {
-    let version: string
+      expect(actualURL).toEqual(expectedURL);
+    });
+  });
+  describe("for versions greater than 3.7.1", () => {
+    let version: string;
     beforeEach(() => {
-      version = 'v3.8.0'
-    })
-    it('should get the right URL for windows platform', () => {
-      setPlatform('win32')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.exe`
+      version = "v3.8.0";
+    });
+    it("should get the right URL for windows platform", () => {
+      setPlatform("win32");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.exe`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
+      expect(actualURL).toEqual(expectedURL);
+    });
 
-    it('should get the right URL for linux platform', () => {
-      setPlatform('linux')
-      setArch('x64')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.linux.amd64`
+    it("should get the right URL for linux platform", () => {
+      setPlatform("linux");
+      setArch("x64");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.linux.amd64`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
+      expect(actualURL).toEqual(expectedURL);
+    });
 
-    it('should get the right URL for darwin platform', () => {
-      setPlatform('darwin')
-      setArch('arm64')
-      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.darwin.arm64`
+    it("should get the right URL for darwin platform", () => {
+      setPlatform("darwin");
+      setArch("arm64");
+      const expectedURL = `https://github.com/getsops/sops/releases/download/v3.8.0/sops-v3.8.0.darwin.arm64`;
 
-      const actualURL = sops.downloadURL(version)
+      const actualURL = sops.downloadURL(version);
 
-      expect(actualURL).toEqual(expectedURL)
-    })
-  
-    it('should throw on unsupported platform', () => {
-      setPlatform('android')
-      setArch('arm64')
+      expect(actualURL).toEqual(expectedURL);
+    });
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported platform: android')
-    })
-  
-    it('should throw on unsupported architecture on linux', () => {
-      setPlatform('linux')
-      setArch('riscv64')
+    it("should throw on unsupported platform", () => {
+      setPlatform("android");
+      setArch("arm64");
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: riscv64')
-    })
-  
-    it('should throw on unsupported architecture', () => {
-      setPlatform('win32')
-      setArch('mips')
+      expect(() => sops.downloadURL(version)).toThrow("Unsupported platform: android");
+    });
 
-      expect(() => sops.downloadURL(version)).toThrow('Unsupported architecture: mips')
-    })
-  })
-})
+    it("should throw on unsupported architecture on linux", () => {
+      setPlatform("linux");
+      setArch("riscv64");
 
-describe('When SOPS is being downloaded', () => {
-  it('should download the tool if it is not cached in the runner', async () => {
-    const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('')
+      expect(() => sops.downloadURL(version)).toThrow("Unsupported architecture: riscv64");
+    });
 
-    await sops.download(version, 'someextension', 'someurl')
+    it("should throw on unsupported architecture", () => {
+      setPlatform("win32");
+      setArch("mips");
 
-    expect(mockDownloadTool).toHaveBeenCalledWith('someurl')
-  })
+      expect(() => sops.downloadURL(version)).toThrow("Unsupported architecture: mips");
+    });
+  });
+});
 
-  it('should not download the tool if it is cached in the runner', async () => {
-    const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('binarypath')
+describe("When SOPS is being downloaded", () => {
+  it("should download the tool if it is not cached in the runner", async () => {
+    const version = "3.6.1";
+    mockCacheFile.mockResolvedValue("binarypath");
+    mockFindTool.mockReturnValue("");
 
-    await sops.download(version, 'someextension', 'someurl')
+    await sops.download(version, "someextension", "someurl");
 
-    expect(mockDownloadTool).not.toHaveBeenCalled()
-  })
-})
+    expect(mockDownloadTool).toHaveBeenCalledWith("someurl");
+  });
 
-describe('When SOPS is being installed', () => {
-  it('should add execute permissions to the installed binary', async () => {
-    const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath/version')
+  it("should not download the tool if it is cached in the runner", async () => {
+    const version = "3.6.1";
+    mockCacheFile.mockResolvedValue("binarypath");
+    mockFindTool.mockReturnValue("binarypath");
 
-    await sops.install(version, mockExecutePermission)
+    await sops.download(version, "someextension", "someurl");
 
-    expect(mockExecutePermission).toHaveBeenCalledWith('binarypath/version/sops', '777')
-  })
+    expect(mockDownloadTool).not.toHaveBeenCalled();
+  });
+});
 
-  it('should add the path of SOPS to PATH variable', async () => {
-    const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath/version')
+describe("When SOPS is being installed", () => {
+  it("should add execute permissions to the installed binary", async () => {
+    const version = "3.6.1";
+    mockCacheFile.mockResolvedValue("binarypath/version");
 
-    await sops.install(version, mockExecutePermission)
+    await sops.install(version, mockExecutePermission);
 
-    expect(mockAddPath).toHaveBeenCalledWith('binarypath/version')
-  })
-})
+    expect(mockExecutePermission).toHaveBeenCalledWith("binarypath/version/sops", "777");
+  });
 
-describe('When execution of sops command', () => {
-  const secretFile = 'folder1/encrypted_file.yaml'
-  describe('is successful', () => {
+  it("should add the path of SOPS to PATH variable", async () => {
+    const version = "3.6.1";
+    mockCacheFile.mockResolvedValue("binarypath/version");
+
+    await sops.install(version, mockExecutePermission);
+
+    expect(mockAddPath).toHaveBeenCalledWith("binarypath/version");
+  });
+});
+
+describe("When execution of sops command", () => {
+  const secretFile = "folder1/encrypted_file.yaml";
+  describe("is successful", () => {
     beforeEach(() => {
       mockExec.mockResolvedValue({
         status: true,
-        output: 'decrypted',
-        error: ''
-      })
-    })
+        output: "decrypted",
+        error: "",
+      });
+    });
 
-    it('should pass the right arguments', async () => {
-      const expectedArgs: string[] = []
-      expectedArgs.push('--decrypt')
-      expectedArgs.push('--output-type', 'json')
-      expectedArgs.push(secretFile)
+    it("should pass the right arguments", async () => {
+      const expectedArgs: string[] = [];
+      expectedArgs.push("--decrypt");
+      expectedArgs.push("--output-type", "json");
+      expectedArgs.push(secretFile);
 
-      await sops.decrypt('sops', secretFile, 'json')
+      await sops.decrypt("sops", secretFile, "json");
 
-      expect(mockExec).toHaveBeenCalledWith('sops', expectedArgs)
-    })
+      expect(mockExec).toHaveBeenCalledWith("sops", expectedArgs);
+    });
 
-    it('should not throw an error', async () => {
-      await expect(sops.decrypt('sops', secretFile, 'json')).resolves.not.toThrow()
-    })
-  })
+    it("should not throw an error", async () => {
+      await expect(sops.decrypt("sops", secretFile, "json")).resolves.not.toThrow();
+    });
+  });
 
-  describe('is a failure', () => {
+  describe("is a failure", () => {
     beforeEach(() => {
       mockExec.mockResolvedValue({
         status: false,
-        output: '',
-        error: 'Error message from SOPS'
-      })
-    })
+        output: "",
+        error: "Error message from SOPS",
+      });
+    });
 
-    it('should throw an error', async () => {
-      await expect(sops.decrypt('sops', secretFile, '')).rejects.toThrow()
-    })
+    it("should throw an error", async () => {
+      await expect(sops.decrypt("sops", secretFile, "")).rejects.toThrow();
+    });
 
-    it('should throw the error returned by the command', async () => {
-      const expectedErrorMsg = `Execution of sops command failed on ${secretFile}: Error message from SOPS`
-      await expect(sops.decrypt('sops', secretFile, '')).rejects.toThrowError(expectedErrorMsg)
-    })
-  })
-})
+    it("should throw the error returned by the command", async () => {
+      const expectedErrorMsg = `Execution of sops command failed on ${secretFile}: Error message from SOPS`;
+      await expect(sops.decrypt("sops", secretFile, "")).rejects.toThrowError(expectedErrorMsg);
+    });
+  });
+});
 
-describe('When getting the output format', () => {
-  describe('if format is not specified', () => {
-    it('should return json as default', () => {
-      const expected = 'json'
+describe("When getting the output format", () => {
+  describe("if format is not specified", () => {
+    it("should return json as default", () => {
+      const expected = "json";
 
-      const actual = sops.getOutputFormat('')
+      const actual = sops.getOutputFormat("");
 
-      expect(actual).toStrictEqual(expected)
-    })
-  })
-  describe('If format is not supported by the action', () => {
-    it('should throw an error', () => {
-      const outputType = 'file'
-      const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`
-      expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg)
-    })
-  })
-})
+      expect(actual).toStrictEqual(expected);
+    });
+  });
+  describe("If format is not supported by the action", () => {
+    it("should throw an error", () => {
+      const outputType = "file";
+      const expectedErrorMsg = `Output type "${outputType}" is not supported by sops-decrypt`;
+      expect(() => sops.getOutputFormat(outputType)).toThrowError(expectedErrorMsg);
+    });
+  });
+});
 
-function setPlatform (platform: typeof process.platform) {
-  Object.defineProperty(process, 'platform', {
-    value: platform
-  })
+function setPlatform(platform: typeof process.platform) {
+  Object.defineProperty(process, "platform", {
+    value: platform,
+  });
 }
 
-function setArch (arch: typeof process.arch) {
-  Object.defineProperty(process, 'arch', {
-    value: arch
-  })
+function setArch(arch: typeof process.arch) {
+  Object.defineProperty(process, "arch", {
+    value: arch,
+  });
 }

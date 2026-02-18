@@ -14,43 +14,43 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest'
-import * as sops from '../../src/sops'
+import { describe, expect, it } from "vitest";
+import * as sops from "../../src/sops";
 
-describe('When checking for higher versions of SOPS', () => {
-  it('should return false for version 3.6.1', () => {
-    const version = '3.6.1'
-    const expected = false
+describe("When checking for higher versions of SOPS", () => {
+  it("should return false for version 3.6.1", () => {
+    const version = "3.6.1";
+    const expected = false;
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sops.isVersionGreaterThan371(version);
 
-    expect(actual).toEqual(expected)
-  })
+    expect(actual).toEqual(expected);
+  });
 
-  it('should return false for version v3.7.1', () => {
-    const version = '3.7.1'
-    const expected = false
+  it("should return false for version v3.7.1", () => {
+    const version = "3.7.1";
+    const expected = false;
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sops.isVersionGreaterThan371(version);
 
-    expect(actual).toEqual(expected)
-  })
+    expect(actual).toEqual(expected);
+  });
 
-  it('should return true for version v3.8.0', () => {
-    const version = '3.8.0'
-    const expected = true
+  it("should return true for version v3.8.0", () => {
+    const version = "3.8.0";
+    const expected = true;
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sops.isVersionGreaterThan371(version);
 
-    expect(actual).toEqual(expected)
-  })
+    expect(actual).toEqual(expected);
+  });
 
-  it('should return true for version v3.8.0-rc.1', () => {
-    const version = '3.8.0-rc.1'
-    const expected = true
+  it("should return true for version v3.8.0-rc.1", () => {
+    const version = "3.8.0-rc.1";
+    const expected = true;
 
-    const actual = sops.isVersionGreaterThan371(version)
+    const actual = sops.isVersionGreaterThan371(version);
 
-    expect(actual).toEqual(expected)
-  })
-})
+    expect(actual).toEqual(expected);
+  });
+});
