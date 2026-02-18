@@ -41,13 +41,22 @@ export async function exec(command: string, args: string[], stdin?: string) {
   };
 
   core.info(`Executing the ${command} command`);
-  const returnCode = await actionsExec.exec(command, args, options);
-  core.info(`Executed the ${command} command`);
-  const result: Result = {
-    status: returnCode === 0,
-    output: output.toString().trim(),
-    error: error.toString().trim(),
-  };
-
-  return result;
+  try {
+    const returnCode = await actionsExec.exec(command, args, options);
+    const result: Result = {
+      status: returnCode === 0,
+      output: output.toString().trim(),
+      error: error.toString().trim(),
+    };
+    core.info(`Executed the ${command} command`);
+    return result;
+  } catch (e: unknown) {
+    const result: Result = {
+      status: false,
+      output: output.toString().trim(),
+      error: (e as Error).message,
+    };
+    core.error(`Executed and failed the ${command} command`);
+    return result;
+  }
 }
