@@ -34,7 +34,7 @@
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^4.0.18",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.27.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
