@@ -28,23 +28,25 @@ vi.mock('../../src/gpg.js')
 import { describe, expect, it, vi, beforeEach, afterEach, MockedFunction } from 'vitest'
 import { sopsInstall, sopsDownloadURL, sopsDecrypt, sopsDownload, sopsGetOutputFormat } from '../../src/sops'
 import { commandExec } from '../../src/command'
-import { cacheFile as toolsCacheCacheFile, downloadTool as toolsCacheDownloadTool, find as toolsCacheFind } from '@actions/tool-cache'
+import { cacheFile as toolCacheCacheFile, downloadTool as toolCacheDownloadTool, find as toolCacheFind } from '@actions/tool-cache'
 import { addPath as coreAddPath } from '@actions/core'
 
-const mockCacheFile = vi.mocked(toolsCacheCacheFile)
-const mockDownloadTool = vi.mocked(toolsCacheDownloadTool)
-const mockFindTool = vi.mocked(toolsCacheFind)
-const mockAddPath = vi.mocked(coreAddPath)
+const mockToolCacheFile = vi.mocked(toolCacheCacheFile)
+const mockDownloadTool = vi.mocked(toolCacheDownloadTool)
+const mockToolCacheFind = vi.mocked(toolCacheFind)
+const mockCoreAddPath = vi.mocked(coreAddPath)
+const mockToolCacheDownloadTool = vi.mocked(toolCacheDownloadTool)
 const mockChmod: MockedFunction<Parameters<typeof sopsInstall>[1]> = vi.fn()
-const mockExec = vi.mocked(commandExec)
+const mockCommandExec = vi.mocked(commandExec)
 
 afterEach(() => {
-  mockCacheFile.mockReset()
+  mockToolCacheFile.mockReset()
   mockDownloadTool.mockReset()
-  mockFindTool.mockReset()
-  mockAddPath.mockReset()
+  mockToolCacheFind.mockReset()
+  mockCoreAddPath.mockReset()
+  mockToolCacheDownloadTool.mockReset()
   mockChmod.mockReset()
-  mockExec.mockReset()
+  mockCommandExec.mockReset()
 })
 
 describe('When getting the download URL for SOPS', () => {
@@ -156,18 +158,19 @@ describe('When getting the download URL for SOPS', () => {
 describe('When SOPS is being downloaded', () => {
   it('should download the tool if it is not cached in the runner', async () => {
     const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('')
+    mockToolCacheFile.mockResolvedValue('binarypath')
+    mockToolCacheFind.mockReturnValue('')
+    mockToolCacheDownloadTool.mockResolvedValue('downloadedpath')
 
-    await sopsDownload(version, 'someextension', 'someurl')
+    await sopsDownload(version, 'someextension', 'https://someurl.example/sops')
 
-    expect(mockDownloadTool).toHaveBeenCalledWith('someurl')
+    expect(mockDownloadTool).toHaveBeenCalledWith('https://someurl.example/sops')
   })
 
   it('should not download the tool if it is cached in the runner', async () => {
     const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath')
-    mockFindTool.mockReturnValue('binarypath')
+    mockToolCacheFile.mockResolvedValue('binarypath')
+    mockToolCacheFind.mockReturnValue('binarypath')
 
     await sopsDownload(version, 'someextension', 'someurl')
 
@@ -178,7 +181,7 @@ describe('When SOPS is being downloaded', () => {
 describe('When SOPS is being installed', () => {
   it('should add execute permissions to the installed binary', async () => {
     const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath/version')
+    mockToolCacheFile.mockResolvedValue('binarypath/version')
 
     await sopsInstall(version, mockChmod)
 
@@ -187,11 +190,11 @@ describe('When SOPS is being installed', () => {
 
   it('should add the path of SOPS to PATH variable', async () => {
     const version = '3.6.1'
-    mockCacheFile.mockResolvedValue('binarypath/version')
+    mockToolCacheFile.mockResolvedValue('binarypath/version')
 
     await sopsInstall(version, mockChmod)
 
-    expect(mockAddPath).toHaveBeenCalledWith('binarypath/version')
+    expect(mockCoreAddPath).toHaveBeenCalledWith('binarypath/version')
   })
 })
 
@@ -199,7 +202,7 @@ describe('When execution of sops command', () => {
   const secretFile = 'folder1/encrypted_file.yaml'
   describe('is successful', () => {
     beforeEach(() => {
-      mockExec.mockResolvedValue({
+      mockCommandExec.mockResolvedValue({
         status: true,
         output: 'decrypted',
         error: ''
@@ -214,7 +217,7 @@ describe('When execution of sops command', () => {
 
       await sopsDecrypt('sops', secretFile, 'json')
 
-      expect(mockExec).toHaveBeenCalledWith('sops', expectedArgs)
+      expect(mockCommandExec).toHaveBeenCalledWith('sops', expectedArgs)
     })
 
     it('should not throw an error', async () => {
@@ -224,7 +227,7 @@ describe('When execution of sops command', () => {
 
   describe('is a failure', () => {
     beforeEach(() => {
-      mockExec.mockResolvedValue({
+      mockCommandExec.mockResolvedValue({
         status: false,
         output: '',
         error: 'Error message from SOPS'
