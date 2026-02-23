@@ -31,7 +31,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@fastify/pre-commit": "^2.2.1",
-    "@tsconfig/node24": "^24.0.3",
+    "@tsconfig/node24": "^24.0.4",
     "@types/node": "^25.3.0",
     "@vitest/coverage-v8": "^4.0.18",
     "esbuild": "^0.27.3",
