@@ -33,7 +33,7 @@
     "@fastify/pre-commit": "^2.2.1",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^25.5.2",
-    "@vitest/coverage-v8": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.2",
     "esbuild": "^0.27.4",
     "typescript": "^6.0.2",
     "vitest": "^4.0.18"
