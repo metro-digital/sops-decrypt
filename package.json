@@ -32,7 +32,7 @@
     "@biomejs/biome": "2.4.13",
     "@fastify/pre-commit": "^2.2.1",
     "@tsconfig/node24": "^24.0.4",
-    "@types/node": "^24.12.2",
+    "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.5",
     "esbuild": "^0.28.0",
     "typescript": "^6.0.3",
