@@ -41,7 +41,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/tool-cache": "^4.0.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.4"
   },
   "engines": {
     "node": ">=24.0.0"
